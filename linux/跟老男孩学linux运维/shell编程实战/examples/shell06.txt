@@ -1,0 +1,998 @@
+###示例4-1
+
+shiyufeng:examples shiyufeng$ cat p.sh #
+echo $1
+
+shiyufeng:examples shiyufeng$ sh p.sh learnshell  #传入一个learnshell的字符串参数，赋值给脚本中的$1，并将$1输出
+learnshell
+
+shiyufeng:examples shiyufeng$ sh p.sh learn shell #传入两个字符串参数，但脚本不会接受第2个参数。参数默认以空格分隔
+learn
+
+shiyufeng:examples shiyufeng$ sh p.sh "learn shell" #加引号内容的传参给$1
+learn shell
+
+===============================================================================================================
+
+###示例4-2
+
+shiyufeng:examples shiyufeng$ cat p.sh
+#echo $1  #示例4-1
+
+echo $1 $2 #示例4-2
+
+shiyufeng:examples shiyufeng$ sh p.sh learn shell #同时传入两个字符串参数
+learn shell
+
+shiyufeng:examples shiyufeng$ sh p.sh "learn shell" fighting #传入两个字符串参数，对第1个有空格的字符串用双引号引起来
+learn shell fighting
+
+===============================================================================================================
+
+###示例4-3
+
+shiyufeng:examples shiyufeng$ echo \${1..15} #利用{}输出15个参数
+$1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13 $14 $15
+
+shiyufeng:examples shiyufeng$ echo \${1..15} >p.sh #得用{}输出15个位置参数并定向到p.sh文件
+
+shiyufeng:examples shiyufeng$ cat p.sh
+$1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13 $14 $15
+
+shiyufeng:examples shiyufeng$ vim p.sh  #增加echo命令
+
+shiyufeng:examples shiyufeng$ cat p.sh
+echo $1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12 $13 $14 $15
+
+shiyufeng:examples shiyufeng$ echo {a..z}  #输出26个字母a-z并以空格分隔
+a b c d e f g h i j k l m n o p q r s t u v w x y z
+
+shiyufeng:examples shiyufeng$ sh p.sh  {a..z} #传入26个字母a-z，以空格分隔，作为26个参数.输出位置参数的数字大于9后，输出的内容就不对了
+a b c d e f g h i a0 a1 a2 a3 a4 a5
+
+因此，当位置参数数字大于9时，需要用大括号括起来.如下所示：
+shiyufeng:examples shiyufeng$ cat p.sh
+echo $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13} ${14} ${15}
+
+shiyufeng:examples shiyufeng$ sh p.sh {a..z}
+a b c d e f g h i j k l m n o
+
+下述示例:
+
+case "$1" in     #＜==这里的$1用于接收执行此脚本命令行的第一个参数，规范用法是用双引号引起来。
+    start)       #＜==如果$1接收的值匹配start，则执行下文的start函数及内部的指令。
+        start    #＜==调用脚本中的start函数。
+        RETVAL=$? #＜==这里是记录start函数执行的返回值，$？也是重要的变量，暂时可以忽略，后面有介绍。
+        ;;
+    stop)        #＜==如果$1接收的值匹配stop，则执行下文的stop函数及内部的指令。
+        stop
+        RETVAL=$?
+        ;;
+    status)      #＜==如果$1接收的值匹配status，则执行下文的status函数及内部的指令。
+        status $prog
+        RETVAL=$?
+        ;;
+……省略部分内容
+
+===============================================================================================================
+
+##示例4-4
+
+shiyufeng:examples shiyufeng$ cat p.sh
+echo $0
+
+shiyufeng:examples shiyufeng$ sh p.sh  #执行脚本,$0获取的值为脚本的名字
+p.sh
+
+shiyufeng:examples shiyufeng$ cd ..
+
+shiyufeng:shell编程实战 shiyufeng$ sh examples/p.sh  #执行带路径脚本，$0获取的为脚本名字+路径
+examples/p.sh
+
+===============================================================================================================
+
+##示例4-5
+
+shiyufeng:examples shiyufeng$ dirname p.sh     #dirname命令作用获取脚本的路径
+.
+shiyufeng:examples shiyufeng$ cd ..
+
+shiyufeng:shell编程实战 shiyufeng$ dirname examples/p.sh   #dirname命令作用获取脚本的路径
+examples
+
+shiyufeng:shell编程实战 shiyufeng$ cd examples/
+
+shiyufeng:examples shiyufeng$ basename p.sh    #basename命令作用获取脚本名字
+p.sh
+
+
+===============================================================================================================
+
+##示例4-6
+
+shiyufeng:examples shiyufeng$ cat p.sh
+dirname $0
+basename $0
+
+shiyufeng:examples shiyufeng$ sh p.sh  #dirname输出结果为脚本所在目录，basename为脚本名称
+.
+p.sh
+
+说明：有关$0这个位置参数的系统生产场景案例如下,其中采用rpcbind系统脚本
+
+[root@oldboy scripts]# tail -6 /etc/init.d/rpcbind    #＜==查看结尾6行。
+ echo  $"Usage:  $0  {start|stop|status|restart|reload|force-reload|condrestart|try-restart}"  #＜==$0的基本生产场景就是，当用户的输入不符合脚本的要求时，就打印脚本的名字及使用帮助。
+    RETVAL=2
+     ;;
+    esac
+    exit $RETVAL
+[root@oldboy scripts]# /etc/init.d/rpcbind   #＜==不带任何参数执行rpcbind脚本。
+    Usage:  /etc/init.d/rpcbind  {start|stop|status|restart|reload|force-reload|condrestart|try-restart} #＜==上文/etc/init.d/rpcbind就是$0从脚本命令行获取的值，当用户输入不符合脚本设定的要求时，打印脚本名字及预期的使用帮助。
+
+===============================================================================================================
+
+##示例:4-7 $#获取传参个数
+
+shiyufeng:examples shiyufeng$ echo \${1..9} >p.sh
+
+shiyufeng:examples shiyufeng$ cat p.sh
+$1 $2 $3 $4 $5 $6 $7 $8 $9
+
+shiyufeng:examples shiyufeng$ vim p.sh
+
+shiyufeng:examples shiyufeng$ cat p.sh
+echo $1 $2 $3 $4 $5 $6 $7 $8 $9
+echo $#  #此行打印脚本命令行传参的个数
+
+shiyufeng:examples shiyufeng$ sh p.sh {a..z}
+a b c d e f g h i     #只接收了9个变量，打印9个。
+26    #传入26个字符
+
+===============================================================================================================
+
+##示例:4-8 根据用户在命令行传参个数判断用户的输入
+##这是一个针对$0,$1,$#等多位置参数的综合型企业案例
+
+shiyufeng:examples shiyufeng$ cat p.sh
+[ $# -ne 2 ] && {  #如果传参个数不等于2,注意2后空格
+  echo "must two args"
+  exit 1  #exit shell,return 1
+}
+echo learnShell #满足参数个数的传参要求后，就执行判断后的程序脚本,打印learnShell
+
+shiyufeng:examples shiyufeng$ sh p.sh
+must two args
+
+shiyufeng:examples shiyufeng$ sh p.sh args1 args2
+learnShell
+
+# if判断语句的写法
+
+shiyufeng:examples shiyufeng$ cat p.sh
+if [ $# -ne 2 ]   #如果执行脚本传参个数不等于2
+  then
+    echo "USAGE:/bin/sh $0 arg1 arg2" #给用户提示正确用法，注意此处的$0,打印脚本名字和路径
+    exit 1 #若不满足要求，则退出脚本，返回值为1
+fi
+echo $1 $2 #若参数满足要求，则打印$1 $2获取到的传参的字符串
+
+shiyufeng:examples shiyufeng$ sh p.sh
+USAGE:/bin/sh p.sh arg1 arg2
+
+shiyufeng:examples shiyufeng$ sh p.sh learn shell
+learn shell
+
+===============================================================================================================
+
+##示例4-9:利用set设置位置参数(同命令行脚本的传参)
+
+shiyufeng:examples shiyufeng$ set -- "I am" beautiful girl  #通过set设置三个字符串参数,"--"表示清除所有的参数变量，重新设置后面的参数变量
+
+shiyufeng:examples shiyufeng$ echo $#        # "$#"输出参数的个数
+3
+
+shiyufeng:examples shiyufeng$ echo $1        # 打印第一个参数值
+I am
+
+shiyufeng:examples shiyufeng$ echo $2        # 打印第二个参数值
+beautiful
+
+shiyufeng:examples shiyufeng$ echo $3        # 打印第三个参数值
+girl
+
+shiyufeng:examples shiyufeng$ echo $*        # 打印 $*
+I am beautiful girl
+
+shiyufeng:examples shiyufeng$ echo $@        # 打印$@
+I am beautiful girl
+
+shiyufeng:examples shiyufeng$ for i in $*;do echo $i;done   #使用for循环输出$*测试,输出所有参数（第1个参数被拆分）
+I
+am
+beautiful
+girl
+
+shiyufeng:examples shiyufeng$ for i in $@;do echo $i;done   #使用for循环输出$@测试,输出所有参数(第1个参数被拆分)
+I
+am
+beautiful
+girl
+
+#######"$*","$@"加双引号例子
+
+shiyufeng:examples shiyufeng$ echo "$*"  # "$*"加双引号同不加双引号。输出全部
+I am beautiful girl
+
+shiyufeng:examples shiyufeng$ echo "$@"  # "$@"加双引号同不加双引号。输出全部
+I am beautiful girl
+
+shiyufeng:examples shiyufeng$ for i in "$*";do echo $i;done    #"$*"加双引号，参数里引号中的内容当作一个参数输出了
+I am beautiful girl
+
+shiyufeng:examples shiyufeng$ for i in "$@";do echo $i;done    #"$@"加双引号，每个参数均以独立的内容输出
+I am        # 有双引号算一个参数 set -- "I am" beautiful girl
+beautiful
+girl
+
+shiyufeng:examples shiyufeng$ for i;do echo $i;done   #去掉"in 变量列表"，相当于有引号的in "$@"
+I am
+beautiful
+girl
+
+shiyufeng:examples shiyufeng$ for i in $*;do echo $i;done  # "$*"不加双引号，因此会输出所有参数，然后第一个参数"I am"也被拆开
+I
+am
+beautiful
+girl
+
+shiyufeng:examples shiyufeng$ shift         #用shift将位置参数移位(左移)
+
+shiyufeng:examples shiyufeng$ echo $#       #输出参数个数
+2
+
+shiyufeng:examples shiyufeng$ echo $1       #输出第1个参数
+beautiful
+
+shiyufeng:examples shiyufeng$ echo $2       #输出第2个参数
+girl
+
+
+===============================================================================================================
+
+## 示例4-10:执行命令后获取返回值
+
+[oldboy@oldboy ～]$ pwd   #＜==执行pwd命令，然后用“echo $? ”查看执行命令的状态返回值。
+/home/oldboy
+
+[oldboy@oldboy ～]$ echo $?
+0          #＜==返回0，表示上一个命令的执行是成功的。
+
+[oldboy@oldboy ～]$ ls /root     #＜==列表root目录的内容，
+ls: cannot open directory /root: Permission denied  #＜==提示权限不够。
+
+[oldboy@oldboy ～]$ echo $?
+2  #＜==返回值为非0，表示上一个命令（ls  /root）执行错误。注意：对于不同的错误，返回值是不同的。
+
+[oldboy@oldboy ～]$ rm -fr /root #＜==删除/root目录及其子目录。
+rm: cannot remove `/root': Permission denied        #＜==提示权限不够。
+
+[oldboy@oldboy ～]$ echo $?
+1 #＜==返回值为1（非0）。
+
+[oldboy@oldboy ～]$ oldboy                          #＜==执行一个不存在的命令。
+-bash: oldboy: command not found                    #＜==提示命令找不到。
+
+[oldboy@oldboy ～]$ echo $?
+127 #＜==返回值为127（非0）。
+
+注意：不同命令的执行结果中，"$?"的返回值不尽相同。但在工作场景中，常用的就是0(成功运行)和非0(运行失败)两种状态。
+
+===============================================================================================================
+
+##示例4-11：根据返回值来判断软件的安装步骤是否成功.  在每个执行步骤后面加$?判断命令是否执行成功
+
+[root@oldboy tools]# yum install pcre-devel openssl-devel -y
+
+[root@oldboy tools]# wget -q http://nginx.org/download/nginx-1.10.1.tar.gz
+
+[root@oldboy tools]# tar xf nginx-1.10.1.tar.gz
+
+[root@oldboy tools]# cd nginx-1.10.1
+
+[root@oldboy  nginx-1.10.1]#  ./configure  --prefix=/application/nginx-1.10.1 --user=nginx  --group=nginx  --with-http_ssl_module    --with-http_stub_status_
+module
+    ……省略部分配置过程
+      nginx http proxy temporary files: "proxy_temp"
+      nginx http fastcgi temporary files: "fastcgi_temp"
+      nginx http uwsgi temporary files: "uwsgi_temp"
+      nginx http scgi temporary files: "scgi_temp"
+
+[root@oldboy nginx-1.10.1]# echo $?
+    0
+
+[root@oldboy nginx-1.10.1]# make
+    ……省略部分编译过程
+    sed -e "s|%%PREFIX%%|/application/nginx-1.10.1|" \
+                      -e "s|%%PID_PATH%%|/application/nginx-1.10.1/logs/nginx.pid|" \
+                      -e "s|%%CONF_PATH%%|/application/nginx-1.10.1/conf/nginx.conf|" \
+                      -e "s|%%ERROR_LOG_PATH%%|/application/nginx-1.10.1/logs/error.log|" \
+                      ＜ man/nginx.8 ＞ objs/nginx.8
+                      make[1]: Leaving directory `/home/oldboy/tools/nginx-1.10.1'
+
+[root@oldboy nginx-1.10.1]# echo $?
+  0
+  test -d '/application/nginx-1.10.1/logs' \
+                    || mkdir -p '/application/nginx-1.10.1/logs'
+  make[1]: Leaving directory `/home/oldboy/tools/nginx-1.10.1'
+
+[root@oldboy nginx-1.10.1]# echo $?
+  0
+
+===============================================================================================================
+
+##示例4-12：通过获取$?的返回值确定网站备份是否正确
+
+[root@oldboy ～]# cd /etc/
+
+[root@oldboy etc]# tar zcf /opt/services.tar.gz ./services     #＜==打包备份
+
+[root@oldboy  etc]#  echo  $?   #＜==检查备份后的$？是否为0，如果为0则表示上一tar命令执行成功，工作中会写成Shell脚本。
+0
+
+===============================================================================================================
+
+##示例4-13:通过脚本控制命令及脚本执行后的返回值
+
+[root@oldboy scripts]# cat test4.sh
+[ $# -ne 2 ] && {          #＜==若参数个数不等于2，
+echo "must be two args."   #＜==则输出提示。
+exit 119                   #＜==终止程序运行并以指定的119状态值退出程序，赋值给当前Shell的“$? ”变量。
+}
+echo oldgirl
+
+[root@oldboy scripts]# sh test4.sh      #＜==执行脚本。
+must be two args.
+
+[root@oldboy scripts]# echo $?
+119        #＜==返回值为119，这个就是脚本中exit传过来的返回值。
+
+[root@oldboy scripts]# sh test4.sh a1 a2       #＜==若满足参数要求，
+oldgirl      #＜==则跳过不合要求的提示及以119状态退出的两条命令。
+
+[root@oldboy scripts]# echo $?
+0 #＜==返回值为0，这个就是echo oldgirl正确执行后，“$? ”的结果。
+
+
+在企业场景下，“$? ”返回值的用法如下：
+1）判断命令、脚本或函数等程序是否执行成功。
+2）若在脚本中调用执行“exit 数字”，则会返回这个数字给“$? ”变量。
+3）如果是在函数里，则通过“return 数字”把这个数字以函数返回值的形式传给“$? ”。
+
+===============================================================================================================
+
+##示例4-14：查看系统脚本的应用情况，脚本名为/etc/init.d/rpcbind
+
+[root@oldboy scripts]# sed -n '63,73p' /etc/init.d/rpcbind
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc $prog    #＜==这是停止rpcbind的命令。
+        RETVAL=$?         #＜==将上述命令的返回值“$? ”赋值给RETVAL变量，用于后面的判断。
+        echo
+        [ $RETVAL -eq 0 ]&&{       #＜==这里就是判断，如果返回值为0，则执行下面的指令。
+                rm -f /var/lock/subsys/$prog
+                rm -f /var/run/rpcbind＊
+        }
+        return $RETVAL      #＜==如果返回值不等于0，则跳过条件表达式的判断，在这里直接作为返回值传给执行stop函数的脚本。
+}
+
+===============================================================================================================
+
+##示例4-15:获取脚本执行的进程号(PID)
+
+[root@oldboy scripts]# cat test_pid.sh        #＜==编写一个简单的脚本。
+echo $$ ＞/tmp/a.pid       #＜==获取$$的值，并重定向到/tmp/a.pid里。
+sleep 300                  #＜==休息300秒，模拟守护进程不退出。
+
+[root@oldboy scripts]# ps -ef|grep test_pid|grep -v grep
+
+[root@oldboy scripts]# sh test_pid.sh &       #＜==在后台运行脚本，&符号表示在后台运行。
+[1] 10397                                     #＜==这是脚本的进程号。
+
+[root@oldboy scripts]# ps -ef|grep test_pid|grep -v grep
+root      10397 10292   0 15:57 pts/0         00:00:00 sh test_pid.sh   #＜==这是脚本的进程号。
+
+[root@oldboy scripts]# cat /tmp/a.pid
+10397 #＜==这是$$对应的值。
+
+===============================================================================================================
+
+##示例4-16:实现系统中多次执行某一个脚本后的进程只有一个(此为$$的企业级应用)
+
+说明：有时执行定时任务脚本的频率比较快，并不知道上一个脚本是否真的执行完毕，但是，业务要求同一时刻只能有一个同样的脚本在运行，
+此时就可以利用$$获取上一次运行的脚本进程号，当程序重新运行时，根据获得的进程号，清理掉上一次的进程，运行新的脚本命令，脚本如下：
+
+[root@oldboy scripts]# cat pid.sh
+# ! /bin/sh
+pidpath=/tmp/a.pid      #＜==定义pid文件。
+if [ -f "$pidpath" ]    #＜==如果pid文件存在，则执行then后面的命令。
+  then
+    kill `cat $pidpath` ＞/dev/null 2＞&1   #＜==杀掉与前一个进程号对应的进程。
+    rm -f $pidpath      #＜==删除pid文件。
+fi
+echo $$ ＞$pidpath      #＜==将当前Shell进程号记录到pid文件里。
+sleep 300
+
+
+执行结果如下：
+    [root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep
+    [root@oldboy scripts]# sh pid.sh &  #＜==后台运行脚本。
+    [1] 10617
+    [root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep  #＜==查看启动的脚本进程。
+    root      10617 10462   0 16:20 pts/1     00:00:00 sh pid.sh  #＜==只有一个。
+    [root@oldboy scripts]# sh pid.sh &  #＜==多次运行脚本，每次都会将上一次运行的杀掉。
+    [2] 10624
+    [root@oldboy scripts]# sh pid.sh &  #＜==多次运行脚本，每次都会将上一次运行的杀掉。
+    [3] 10628
+    [1]    Terminated                  sh pid.sh
+    [root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep
+    root      10628 10462   0 16:20 pts/1     00:00:00 sh pid.sh   #＜==发现无论运行多少次脚本，都只有一个进程。
+    [2]-   Terminated                  sh pid.sh
+    [root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep
+    root      10628 10462   0 16:20 pts/1     00:00:00 sh pid.sh    #＜==发现无论运行多少次脚本，都只有一个进程。
+
+提示：
+这是一个生产案例的简单模拟，脚本用于执行启动或定时任务时，相同的脚本中只能有一个在运行，
+当新脚本运行时，必须关闭未运行完或未退出的上一次的同名脚本进程。
+
+===============================================================================================================
+
+##示例4-17: $_参数示例--用于获得上一条命令的最后一个参数值
+
+[root@oldboy scripts]# /etc/init.d/rpcbind start oldboy
+
+[root@oldboy scripts]# echo $_     #＜==打印上一条命令的最后一个参数值，即oldboy。
+oldboy
+
+[root@oldboy scripts]# /etc/init.d/rpcbind stop oldgirl
+Stopping rpcbind:                                                       [   OK   ]
+
+[root@oldboy scripts]# echo $_     #＜==打印上一条命令的最后一个参数值，即oldgirl。
+oldgirl
+
+===============================================================================================================
+
+##示例4-18 $!功能示例 --$!类似于$$,作用是获取上一次执行脚本的pid
+
+[root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep
+
+[root@oldboy scripts]# sh pid.sh &    #＜==后台运行pid.sh脚本。
+[1] 10760
+
+[root@oldboy scripts]# echo $!        #＜==获取前一次执行脚本pid.sh的进程号。
+10760
+
+[root@oldboy scripts]# ps -ef|grep pid.sh|grep -v grep
+root       10760 10462   0 16:44 pts/1     00:00:00 sh pid.sh
+===============================================================================================================
+
+##示例4-19:echo的参数应用示例
+
+[root@oldboy etc]# echo oldboy; echo oldgirl
+oldboy
+oldgirl
+
+[root@oldboy etc]# echo -n oldboy; echo oldgirl   #＜==-n不换行输出。
+oldboyoldgirl
+
+[root@oldboy etc]# echo "oldboy\toldgirl\noldboy\toldgirl"
+oldboy\toldgirl\noldboy\toldgirl
+
+[root@oldboy etc]# echo -e "oldboy\toldgirl\noldboy\toldgirl"    #＜==加上-e解析以“\”开头的字符。
+oldboy  oldgirl       #＜==oldboy和oldgirl之间的空隙就是\t的作用。遇到\n后重新开启一行。
+oldboy   oldgirl
+
+[root@oldboy  etc]#  printf  "oldboy\toldgirl\noldboy\toldgirl\n"  #＜==printf的转义字符能力与echo类似。
+oldboy   oldgirl
+oldboy   oldgirl
+
+[root@oldboy etc]# echo -e "1\b23"     #＜==加上-e解析以“\”开头的字符，\b退格。
+23
+
+[root@oldboy etc]# printf "1\b23\n"    #＜==printf的转义字符功能与echo类似。
+23
+
+说明：printf与echo功能类似，但printf更强大。当需要特殊复杂的格式时才考虑使用printf
+
+===============================================================================================================
+
+##示例4-20:set和eval命令的使用(含特殊位置变量用法)
+##eval功能:当shell程序执行到eval语句时，shell读入参数args，并将它们组合成一个新的命令，然后执行
+
+[root@oldboy etc]# cat noeval.sh
+echo \$$#            #＜==$#表示传参的个数。
+
+[root@oldboy etc]# sh noeval.sh arg1 arg2   #＜==传入两个参数。
+$2                   #＜==传入两个参数，因此$# 为2，于是echo \$$# 就变成了echo $2，最后输出$2，并没有打印arg2。
+
+[root@oldboy etc]# cat eval.sh
+eval "echo \$$# "    #＜==加上eval命令，使得打印的特殊位置参数，重新解析输出，而不是输出$2本身。
+
+[root@oldboy etc]# sh eval.sh arg1 arg2
+arg2                 #＜==输出了$2。
+
+
+===============================================================================================================
+
+##示例4-21 exec的功能示例
+
+[root@oldboy ～]# exec date
+2016年 09月 12日 星期一 13:29:22 CST
+
+[oldboy@oldboy ～]$ #＜==退到普通用户模式下了。
+
+当使用exec打开文件后，read命令每次都会将文件指针移动到文件的下一行进行读取，直到文件末尾，利用这个可以实现处理文件内容。
+
+范例4-21:exec的功能示例。
+
+[root@oldboy etc]# seq 5 ＞/tmp/tmp.log
+
+[root@oldboy etc]# cat exec.sh
+exec ＜/tmp/tmp.log        #＜==读取log内容。
+while read line            #＜==利用read一行行读取处理。
+do
+    echo $line             #＜==打印输出。
+done
+echo ok
+
+执行结果如下：
+
+[root@oldboy etc]# sh exec.sh
+1
+2
+3
+4
+5
+ok
+
+===============================================================================================================
+
+##示例4-22&4-23:shift功能介绍
+
+###功能：shift语句会按如下方式重新命名所有的位置参数变量，即$2成为$1、$3成为$2等，以此类推，在程序中每使用一次shift语句，都会使所有的位置参数依次向左移动一个位置，并使位置参数$#减1，直到减到0为止。
+
+[root@oldboy 02]# help shift
+shift: shift [n]
+    Shift positional parameters.
+    Rename the positional parameters $N+1, $N+2 ... to $1, $2 ...   If N is
+    not given, it is assumed to be 1.
+    Exit Status:
+    Returns success unless N is negative or greater than $# .
+
+###shift命令的主要作用是将位置参数$1、$2等进行左移，即如果位置参数是$3、$2、$1，那么执行一次shift后，$3就变成了$2, $2变成了$1, $1就消失了。
+
+
+[root@oldboy script]# cat n.sh
+echo $1 $2
+if [ $# -eq 2 ]; then
+    shift
+    echo $1
+fi
+
+[root@oldboy script]# sh n.sh 1 2
+1 2 #＜==这是echo $1 $2的结果。
+2    #＜==这里是echo $1的结果，但是输出的是传参时$2的值。
+
+#####应用场景：当我们写Shell希望像命令行的命令通过参数控制不同的功能时，就会先传一个类似-c的参数，然后再接内容。
+
+[root@shell scripts]# sh shift.sh -c oldboy
+-c oldboy  #＜==对应$1 $2的输出。
+oldboy     #＜==对应$1的输出，因为执行了shift，因此第二个参数$2的内容，就变成了$1，
+                所以输出了oldboy。
+
+#####以下是系统案例ssh-copy-id -i /root/.ssh/id_dsa.pub：
+
+ID_FILE="${HOME}/.ssh/id_rsa.pub"
+if [ "-i" = "$1" ]; then
+  shift
+  # check if we have 2 parameters left, if so the first is the new ID file
+  if [ -n "$2" ]; then
+    if expr "$1" : ".＊\.pub" ＞ /dev/null ; then
+      ID_FILE="$1"
+    else
+      ID_FILE="$1.pub"
+    fi
+    shift            # and this should leave $1 as the target name
+  fi
+
+作用：方便。
+
+===============================================================================================================
+
+##示例4-24:返回OLDBOY变量值的长度
+
+###准备：定义OLDBOY变量，赋值内容为“I am oldboy”，操作代码如下：
+
+[root@oldboy scripts]# OLDBOY="I am oldboy"      #＜==这里的OLDBOY变量，就是表4-4中parameter变量的具体化示例。
+[root@oldboy scripts]# echo ${OLDBOY}            #＜==带大括号打印变量OLDBOY。
+I am oldboy
+[root@oldboy scripts]# echo $OLDBOY              #＜==直接打印变量OLDBOY。
+I am oldboy
+
+###实操  -- > 通过在变量名前加#，就可以打印变量值的长度：
+[root@oldboy scripts]# echo ${#OLDBOY}
+11                           #＜==I am oldboy．这些字符加起来正好是11.
+
+===============================================================================================================
+
+##示例4-25:Shell的其他打印变量长度的方法。 --此为范例4-24的拓展，代码如下：
+
+[root@oldboy scripts]# echo $OLDBOY|wc -L       #＜==输出变量值，然后通过管道交给wc计算长度。
+11
+
+[root@oldboy scripts]# expr length "$OLDBOY"    #＜==利用expr的length函数计算变量长度。
+11
+
+[root@oldboy scripts]# echo "$OLDBOY"|awk '{print length($0)}'   #＜==利用awk的length函数计算变量长度，也可无“（$0）”这几个字符。
+11
+
+提示：上述计算变量长度的方法中，变量的字串方式是最快的，即${#OLDBOY}的方式。
+
+===============================================================================================================
+
+##示例4-26：利用time命令及for循环对几种获取字符串长度的方法进行性能比较。
+
+（1）变量自带的获取长度的方法（echo ${#char}）
+
+  [root@oldboy  tmp]#  time  for  n  in  {1..10000}; do  char=`seq  -s  "oldboy" 100`; echo ${#char} &＞/dev/null; done
+    real     0m40.702s   #＜==变量自带的获取长度的方法用时最少，效率最高。
+    user     0m19.040s
+    sys       0m17.156s
+
+
+ （2）利用管道加wc的方法（echo ${char}|wc -L）
+
+   [root@oldboy  tmp]#  time  for  n  in  {1..10000}; do  char=`seq  -s  "oldboy" 100`; echo ${char}|wc -L &＞/dev/null; done
+     real     1m53.716s #＜==使用了管道加wc -L计算，结果倒数第二，仅次于管道加awk统计的。
+     user     0m46.709s
+     sys       0m53.930s
+
+ （3）利用expr自带的length方法（expr length "${char}"）
+
+   [root@oldboy  tmp]#  time  for  n  in  {1..10000}; do  char=`seq  -s  "oldboy" 100`; expr length "${char}"&＞/dev/null; done
+     real     1m15.936s #＜==好于使用管道和wc的计算方法，但是比变量自带的获取长度的方法要差一些。
+     user     0m34.375s
+     sys       0m31.338s
+
+ （4）利用awk自带的length函数方法
+     [root@oldboy  tmp]#  time  for  n  in  {1..10000}; do  char=`seq  -s  "oldboy" 100`; echo $char|awk '{print length($0)}'&＞/dev/null; done
+     real     2m1.099s  #＜==使用了管道还有awk的函数计算，结果最差。
+     user     0m49.129s
+     sys       0m58.034s
+
+ 可以看到，这几种方法的速度相差几十到上百倍，一般情况下调用外部命令来处理的方式与使用内置操作的速度相差较大。
+ 在Shell编程中，应尽量使用内置操作或函数来完成。
+
+ 有关获取字符串长度的几种统计方法的性能比较如下：
+ □变量自带的计算长度的方法的效率最高，在要求效率的场景中尽量多用。
+ □使用管道统计的方法的效率都比较差，在要求效率的场景中尽量不用。
+ □对于日常简单的脚本计算，读者可以根据自己所擅长的或易用的程度去选择
+
+===============================================================================================================
+
+##示例4-27：截取OLDBOY变量的内容，从第2个字符之后开始截取，默认截取后面字符的全部，第2个字符不包含在内，也可理解为删除前面的多个字符。
+
+[root@oldboy scripts]# echo ${OLDBOY}
+I am oldboy
+
+[root@oldboy scripts]# echo ${OLDBOY:2}
+am oldboy  #＜==相当于从I后面的空格开始计算，截取到了结尾。
+
+===============================================================================================================
+
+##示例4-28：截取OLDBOY变量的内容，从第2个字符之后开始截取，截取2个字符。
+
+[root@oldboy scripts]# echo ${OLDBOY:2:2}
+am
+
+###提示：这个功能类似于cut命令-c参数的功能。
+
+[root@oldboy scripts]# echo ${OLDBOY}|cut -c 3-4 #＜==输出变量的内容，管道交给cut截取第3～4个位置的字符。
+am
+
+===============================================================================================================
+
+##示例4-29：从变量$OLDBOY内容的开头开始删除最短匹配“a*C”及“a*c”的子串。
+
+[root@oldboy scripts]# OLDBOY=abcABC123ABCabc
+
+[root@oldboy scripts]# echo $OLDBOY
+abcABC123ABCabc
+
+[root@oldboy scripts]# echo ${OLDBOY#a＊C}     #＜==从开头开始删除最短匹配“a＊C”的子串。
+123ABCabc                                      #＜==从开头开始删除了abcABC。
+
+[root@oldboy scripts]# echo ${OLDBOY# a＊c}
+ABC123ABCabc                                   #＜==从开头开始删除了abc。
+
+===============================================================================================================
+
+##示例4-30：从变量$OLDBOY开头开始删除最长匹配“a*C”及“a*c”的子串。
+
+[root@oldboy scripts]# OLDBOY=abcABC123ABCabc
+
+[root@oldboy scripts]# echo $OLDBOY
+abcABC123ABCabc
+
+[root@oldboy scripts]# echo ${OLDBOY## a＊c} #＜==从开头开始删除最长匹配“a＊c”的子串。
+          #＜==结果为空了，说明都匹配了，全部删除了。
+
+[root@oldboy scripts]# echo ${OLDBOY## a＊C} #＜==从开头开始删除最长匹配“a＊C”的子串。
+abc       #＜==结果为abc，说明匹配了abcABC123ABC并删除了这些字符。
+
+===============================================================================================================
+
+##示例4-31：从变量$OLDBOY结尾开始删除最短匹配“a*C”及“a*c”的子串。
+
+[root@oldboy scripts]# OLDBOY=abcABC123ABCabc
+
+[root@oldboy scripts]# echo $OLDBOY
+abcABC123ABCabc
+
+[root@oldboy scripts]# echo ${OLDBOY%a＊C} #＜==从结尾开始删除最短匹配“a＊C”的子串。
+abcABC123ABCabc  #＜==原样输出，因为从结尾开始“a＊C”没有匹配上任何子串，因此，没有删除任何字符。
+
+[root@oldboy scripts]# echo ${OLDBOY%a＊c} #＜==从结尾开始删除最短匹配“a＊c”的子串。
+abcABC123ABC     #＜==从结尾开始删除最短匹配“a＊c”，即删除了结尾的abc三个字符。
+
+===============================================================================================================
+
+##示例4-32：从变量$OLDBOY结尾开始删除最长匹配“a*C”及“a*c”的子串。
+
+[root@oldboy scripts]# OLDBOY=abcABC123ABCabc
+
+[root@oldboy scripts]# echo $OLDBOY
+abcABC123ABCabc
+
+[root@oldboy scripts]# echo ${OLDBOY%%a＊C}     #＜==从结尾开始删除最长匹配“a＊C” 的子串。
+abcABC123ABCabc #＜==原样输出，因为从结尾开始“a＊C”没有匹配上任何子串，因此，没有删除任何字符。
+
+[root@oldboy scripts]# echo ${OLDBOY%%a＊c}     #＜==从结尾开始删除最长匹配“a＊c”的子串。
+                #＜==从结尾开始删除最长匹配“a＊c”的字符串，即删除全部字符。
+
+
+#####有关上述匹配删除的小结：
+#表示从开头删除匹配最短。
+##表示从开头删除匹配最长。
+%表示从结尾删除匹配最短。
+%%表示从结尾删除匹配最长。
+a*c表示匹配的字符串，*表示匹配所有，a*c匹配开头为a、中间为任意多个字符、结尾为c的字符串。
+a*C表示匹配的字符串，*表示匹配所有，a*C匹配开头为a、中间为任意多个字符、结尾为C的字符串。
+
+===============================================================================================================
+
+##示例4-33：使用oldgirl字符串代替变量$OLDBOY匹配的oldboy字符串。
+
+[root@oldboy scripts]# OLDBOY="I am oldboy, yes, oldboy"
+
+[root@oldboy scripts]# echo $OLDBOY
+I am oldboy, yes, oldboy
+
+[root@oldboy scripts]# echo ${OLDBOY/oldboy/oldgirl} #＜==替换匹配的第一个字符串。
+I am oldgirl, yes, oldboy    #＜==真的只替换了第一个。
+
+[root@oldboy scripts]# echo ${OLDBOY//oldboy/oldgirl} #＜==替换匹配的所有字符串。
+I am oldgirl, yes, oldgirl   #＜==真的替换了所有匹配oldboy的字符串。
+
+有关替换的小结：
+□一个“/”表示替换匹配的第一个字符串。
+□两个“/”表示替换匹配的所有字符串。
+
+===============================================================================================================
+
+##示例4-34 去掉下面所有文件的文件名中的“_finished”字符串
+
+[root@oldboy test]# ls -l ＊.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_1_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_2_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_3_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_4_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_5_finished.jpg
+
+###要想批量改名，首先得知道单个的文件应如何改名。单个文件的改名命令为：
+$ mv stu_102999_1_finished.jpg stu_102999_1.jpg
+
+###下面利用变量赋值和替换的方式实现上述mv命令的改名要求。
+
+[root@oldboy  test]#  f=stu_102999_1_finished.jpg  #＜==取一个文件名赋值给变量f，这个就是要修改的源文件。
+
+[root@oldboy test]# echo ${f//_finished/}    #＜==利用变量的子串替换功能把变量f里的_finished替换为空。
+stu_102999_1.jpg   #＜==这个就是要修改的目标文件。
+
+[root@oldboy test]# mv $f `echo ${f//_finished/}` #＜==使用mv命令执行修改操作，注意目标命令要用反引号括起来。
+
+[root@oldboy test]# ls -l ＊.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_1.jpg   #＜==查看改过的结果，确实全部都改完了。
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_2_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_3_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_4_finished.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_5_finished.jpg
+
+###学会处理了一个，就可以进行批量处理了，批量处理就是利用循环而已
+
+[root@oldboy test]# for f in `ls ＊fin＊.jpg`; do mv $f `echo ${f//_finished/}`; done   #＜==其实就是使用for循环，循环上面是进行单个处理的mv命令。mv $f `echo ${f//_finished/}`
+
+[root@oldboy test]# ls -l ＊.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_1.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_2.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_3.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_4.jpg
+-rw-r--r-- 1 root root 0 Jul 30 20:33 stu_102999_5.jpg
+
+===============================================================================================================
+
+##示例4-25:${parameter:-word}用法功能示例1
+
+[root@oldboy test]# echo $test  #＜==变量未设置，所以输出时为空。
+
+[root@oldboy test]# result=${test:-UNSET}       #＜==若test没值，则返回UNSET。
+
+[root@oldboy test]# echo $result       #＜==打印result变量，返回UNSET，因为test没有赋值。
+UNSET
+
+[root@oldboy test]# echo ${test}       #＜==注意，此时打印test变量还是为空。
+
+结论：
+
+对于${test:-UNSET}，当test变量没值时，就返回变量结尾设置的UNSET字符串。
+
+===============================================================================================================
+
+##示例4-36:${parameter:-word}用法功能示例2
+
+[root@oldboy test]# test=oldboy   #＜==给test变量赋值oldboy字符串。
+
+[root@oldboy test]# echo $test
+oldboy
+
+[root@oldboy test]# result=${test:-UNSET}              #＜==重新定义result。
+
+[root@oldboy test]# echo $result    #＜==因为test已赋值，因此，打印result就输出了test的值oldboy，而不是原来的UNSET。
+oldboy
+
+****提示：这个变量的功能可以用来判断变量是否已定义。
+
+[root@oldboy test]# result=${test-UNSET}               #＜==定义时忽略了冒号。
+
+[root@oldboy test]# echo $result
+oldboy                                                 #＜==打印结果和带冒号时没有变化。
+
+####结论：当test变量有值时，就打印result变量，返回test变量的内容。
+
+===============================================================================================================
+
+##示例4-37:${parameter:=word}用法功能示例
+
+[root@oldboy test]# unset result                  #＜==撤销result变量定义。
+
+[root@oldboy test]# echo $result
+
+[root@oldboy test]# unset test                    #＜==撤销test变量定义。
+
+[root@oldboy test]# echo $test
+
+[root@oldboy test]# result=${test:=UNSET}         #＜==重新对变量result进行定义。
+
+[root@oldboy test]# echo $result
+UNSET
+
+[root@oldboy test]# echo $test   #＜==注意，这里的test原来是没有定义的，现在已经被赋值UNSET了，这是和“:- ”表达式的区别。
+UNSET
+
+[root@oldboy test]# result=${test=UNSET}          #＜==定义时忽略了冒号。
+
+[root@oldboy test]# echo $result
+UNSET         #＜==打印结果和带冒号时没有变化。
+
+[root@oldboy test]# echo $test
+UNSET         #＜==打印结果和带冒号时没有变化。
+
+####当变量（result）值里的变量（test）值没有定义时，会给变量（result）赋值“:=”后面的内容，同时会把“:=”后面的内容赋值给变量（result）值里没有定义的变量（test）。
+####这个变量的功能可以解决变量没有定义的问题，并确保没有定义的变量始终有值。
+
+===============================================================================================================
+
+##示例4-38:${parameter:?word}用法功能示例
+
+[root@oldboy test]# echo ${key:? not defined}    #＜==key变量没有定义，因此，把“not defined”作为标准错误输出。
+-bash: key: not defined       #＜==错误提示，只不过是事先定义好的错误输出。
+
+[root@oldboy test]# echo ${key? not defined}     #＜==去掉冒号定义，并输出，结果一致。
+-bash: key: not defined
+
+[root@oldboy test]# key=1 #＜==给变量赋值1。
+
+[root@oldboy test]# echo ${key:? not defined}    #＜==因为key有值了，所以，打印key的值1。
+1
+
+[root@oldboy test]# echo ${key? not defined}     #＜==去掉冒号定义，并输出，结果一致。
+1
+
+[root@oldboy test]# unset key     #＜==取消key的定义。
+
+[root@oldboy test]# echo ${key:? not defined}
+-bash: key: not defined           #＜==又打印错误提示了。
+
+####本例的用法可以用于设定由于变量未定义而报错的具体内容，如：“not defined”。
+
+===============================================================================================================
+
+##示例4-39:${parameter:+word}用法功能示例
+
+[root@oldboy test]# oldboy=${oldgirl:+word}     #＜==oldgirl变量未定义。
+
+[root@oldboy test]# echo $oldboy     #＜==因为oldgirl变量未定义，所以打印oldboy变量为空
+
+[root@oldboy test]# oldgirl=19       #＜==oldgirl变量赋值为19。
+
+[root@oldboy test]# oldboy=${oldgirl:+word}      #＜==注意，这里一定要重新定义oldboy。
+
+[root@oldboy test]# echo $oldboy     #＜==因为oldgirl变量有值，所以打印oldboy变量输出为“:+ ”后面的内容。
+word
+
+####此功能可用于测试变量（oldgirl的位置）是否存在，如果oldboy的值为word，则证明oldgirl变量有值
+
+===============================================================================================================
+
+##示例4-40（生产案例）：实现Apache服务启动脚本/etc/init.d/httpd（请重点看加粗的部分）
+
+# ! /bin/bash
+#
+# httpd Startup script for the Apache HTTP Server
+#
+..skip…
+# Start httpd in the C locale by default.
+HTTPD_LANG=${HTTPD_LANG-"C"}  #＜==如果HTTPD_LANG变量没有定义或为空，则打印HTTPD_LANG变量返回C值。
+#＜==这一步定义方法的目的是防止变量值为空或未定义。使用的是(${parameter-word}用法，此处省略了冒号)。
+# This will prevent initlog from swallowing up a pass-phrase prompt if
+# mod_ssl needs a pass-phrase from the user.
+INITLOG_ARGS=""
+# Set HTTPD=/usr/sbin/httpd.worker in /etc/sysconfig/httpd to use a server
+# with the thread-based "worker" MPM; BE WARNED that some modules may not
+# work correctly with a thread-based MPM; notably PHP will refuse to start.
+# Path to the apachectl script, server binary, and short-form for messages.
+apachectl=/usr/sbin/apachectl
+httpd=${HTTPD-/usr/sbin/httpd}
+#＜==如果HTTPD变量没有定义或为空，则打印HTTPD_LANG变量返回/usr/sbin/httpd的值。
+#＜== 此步定义方法的目的是防止变量值为空或未定义。使用的是(${parameter-word}用法，冒号省略了)。
+prog=httpd
+pidfile=${PIDFILE-/var/run/httpd.pid}
+lockfile=${LOCKFILE-/var/lock/subsys/httpd}
+RETVAL=0
+…skip…
+exit $RETVAL
+
+####提示：通过执行yum install httpd -y后可以查看/etc/init.d/httpd文件。
+
+####在企业中，针对目录路径等的处理就可以采用上述变量不存在（即赋指定值）的方式，防止因目录路径不存在而导致的异常。例如：变量如果为NULL或没有定义，则赋予一个备用的值，特别是针对变量的删除操作，这种方式会很有用，否则所删除的变量如果不存在，则可能导致未知的危险。
+
+===============================================================================================================
+
+##示例4-41（生产案例）：删除7天前的过期数据备份
+
+###如果忘记了定义path变量，又不希望path值为空值，就可以定义/tmp替代path空值的返回值，如下：
+
+[root@oldboy test]# cat del.sh
+find ${path-/tmp} -name "＊.tar.gz" -type f -mtime +7|xargs rm -f
+
+[root@oldboy test]# sh -x del.sh
++ xargs rm -f
++  find  /tmp  -name  '＊.tar.gz'  -type  f  -mtime  +7   #＜==执行时，系统会自动删除/tmp下的文件。
+
+####如果忘了定义path变量，并且还未做特殊变量定义，那么命令就会出现意外，如下：
+
+[root@oldboy tmp]# cat a.sh
+find ${path} -name "＊.tar.gz" -type f -mtime +7|xargs rm -f
+
+[root@oldboy tmp]# sh -x a.sh
++ xargs rm -f
++  find  -name  '＊.tar.gz'  -type  f  -mtime  +7  #＜==这条命令明显没有指定路径，因此将会导致异常。

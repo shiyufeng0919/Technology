@@ -1,0 +1,11 @@
+shiyufeng:~ shiyufeng$ MYNAME="learn shell"  #指定变量
+
+shiyufeng:~ shiyufeng$ echo $MYNAME   #输出变量 ，无符号，解析输出
+learn shell
+
+shiyufeng:~ shiyufeng$ echo '$MYNAME' #输出变量，单引号，原样输出
+$MYNAME
+
+shiyufeng:~ shiyufeng$ echo "$MYNAME" #输出变量，双引号，解析输出
+learn shell
+

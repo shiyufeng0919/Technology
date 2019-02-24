@@ -1,0 +1,17 @@
+shiyufeng:examples shiyufeng$ ETT="oldgirl"
+shiyufeng:examples shiyufeng$ echo "$ETT"|awk '{print $0}'
+oldgirl
+shiyufeng:examples shiyufeng$ echo '$ETT'|awk '{print $0}'
+$ETT
+shiyufeng:examples shiyufeng$ echo $ETT|awk '{print $0}'
+oldgirl
+
+
+shiyufeng:examples shiyufeng$ ETT=`pwd`
+shiyufeng:examples shiyufeng$ echo "$ETT"|awk '{print $0}'
+/Users/shiyufeng/Documents/shiyufeng/Technology/Linux/跟老男孩学linux运维/shell编程实战/examples
+shiyufeng:examples shiyufeng$ echo '$ETT'|awk '{print $0}'
+$ETT
+shiyufeng:examples shiyufeng$ echo $ETT|awk '{print $0}'
+/Users/shiyufeng/Documents/shiyufeng/Technology/Linux/跟老男孩学linux运维/shell编程实战/examples
+shiyufeng:examples shiyufeng$

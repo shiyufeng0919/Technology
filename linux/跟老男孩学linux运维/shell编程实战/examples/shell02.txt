@@ -1,0 +1,12 @@
+
+shiyufeng:~ shiyufeng$ echo 'today is date'   # 单引号内容原样输出
+today is date
+
+shiyufeng:~ shiyufeng$ echo 'today is `date`'  # 单引号内容原样输出，加反引号也没用
+today is `date`
+
+shiyufeng:~ shiyufeng$ echo "today is `date`"  # 双引号，会解析反引号内容
+today is Sat Feb 23 15:35:51 CST 2019
+
+shiyufeng:~ shiyufeng$ echo "today is $(date)" # $(date)<=>`date`，输出命令
+today is Sat Feb 23 15:36:18 CST 2019

@@ -1,0 +1,55 @@
+#测试不加任何引号
+shiyufeng:examples shiyufeng$ ETT=123
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "$ETT"}' #双引号输出了本身
+$ETT
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print $ETT}'  #不加双引号输出空结果
+awk: illegal field $(), name "ETT"
+ source line number 1
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "'$ETT'"}'
+123
+
+#测试加单引号
+shiyufeng:examples shiyufeng$ ETT='oldgirl'
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "$ETT"}'
+$ETT
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print $ETT}'
+awk: illegal field $(), name "ETT"
+ source line number 1
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "'$ETT'"}'
+oldgirl
+
+#测试双引号
+shiyufeng:examples shiyufeng$ ETT="tingting"
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "$ETT"}'
+$ETT
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print $ETT}'
+awk: illegal field $(), name "ETT"
+ source line number 1
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "'$ETT'"}'
+tingting
+
+#测试反引号
+shiyufeng:examples shiyufeng$ ETT=`pwd`
+
+shiyufeng:examples shiyufeng$ echo $ETT
+/Users/shiyufeng/Documents/shiyufeng/Technology/Linux/跟老男孩学linux运维/shell编程实战/examples
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "$ETT"}'
+$ETT
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print $ETT}'
+awk: illegal field $(), name "ETT"
+ source line number 1
+
+shiyufeng:examples shiyufeng$ awk 'BEGIN {print "'$ETT'"}'
+/Users/shiyufeng/Documents/shiyufeng/Technology/Linux/跟老男孩学linux运维/shell编程实战/examples
+
