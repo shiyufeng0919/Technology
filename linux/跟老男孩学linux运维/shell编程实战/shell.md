@@ -110,7 +110,7 @@ $ expect test.exp #执行test.exp
 
 shell脚本运行，会先查找系统环境变量ENV，该变量指定了环境文件(加载顺序:/etc/profile,~/.bash_profile,~/.bashrc,/etc/bashrc)
 
-[shell脚本的基本执行流程](images/shell脚本的基本执行流程.jpeg)
+![shell脚本的基本执行流程](images/shell脚本的基本执行流程.jpeg)
 
 #### shell脚本的执行可采用如下方式--常用
 
