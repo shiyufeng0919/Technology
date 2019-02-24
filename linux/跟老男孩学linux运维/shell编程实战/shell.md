@@ -166,7 +166,7 @@ $ cat shell01.sh | bash #执行shell脚本(拼接方式，查看执行)
 
 **其他：可配置vim简化操作，如：实现自动缩近，自动补全成对符号，自动加入起始解释器及版权信息等**
 
-### [shell脚本学习指南中的实操](Shell脚本：Linux Shell脚本学习指南))
+### [shell脚本学习指南中的实操](http://c.biancheng.net/shell/)
 
 shell提示符：#(超级用户root)和$(普通用户)
 
@@ -659,4 +659,4 @@ $ man bash  -> / Parameter Expansion  #搜索相关帮助内容
 ### 5.9.2 以read命令读入及传参的综合企业案例
 
 
-[文档](Shell脚本：Linux Shell脚本学习指南)
+[文档Shell脚本：Linux Shell脚本学习指南](http://c.biancheng.net/shell/)
