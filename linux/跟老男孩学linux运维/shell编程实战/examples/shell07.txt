@@ -337,10 +337,87 @@ echo $(($1))
 ####提示：本脚本没有对输入的参数做判断。
 ================================================================================================================
 
+##范例5-11：给自变量i加8
+
+[root@oldboy scripts]# i=2
+[root@oldboy scripts]# i=i+8      #＜==假如开头不用let进行赋值。
+[root@oldboy scripts]# echo $i    #＜==输出时会发现，打印结果为i+8，也就是没有计算。
+i+8
+
+[root@oldboy scripts]# unset i    #清除i的值
+
+[root@oldboy scripts]# i=2
+[root@oldboy scripts]# let i=i+8   #＜==采用let赋值后再输出。
+[root@oldboy scripts]# echo $i
+10  #＜==结果为10
+
+##提示：let i=i+8等同于((i=i+8))，但后者效率更高。
 
 ================================================================================================================
 
+##范例5-12：监控Web服务状态，如果访问两次均失败，则报警（let应用案例）
+##以下以简单的企业实战脚本作为参考答案（更专业更规范的企业实战脚本见后文）：
 
+[root@oldboy scripts]# cat 05_12_checkurl.sh
+CheckUrl() {      #＜==定义函数，名字为CheckUrl。
+    timeout=5     #＜==定义wget访问的超时时间，超时就退出。
+    fails=0       #＜==初始化访问网站失败的次数记录变量，若失败达到两次，就发邮件报警。
+    success=0     #＜==初始化访问网站成功的次数记录变量，如果为1，则表示成功，退出脚本。
+    while true    #＜==持续循环检测。
+      do
+        wget --timeout=$timeout --tries=1 http://oldboy.blog.51cto.com -q -O /dev/null   #＜==使用wget测试访问老男孩的博客地址。
+        if [ $? -ne 0 ]  #＜==如果上述wget命令执行不成功，即返回值不为0，则执行if语句内的指令。
+          then
+            let fails=fails+1     #＜==将访问失败的次数加1，这个就是let的用法，可以用((fails=fails+1))代替。
+        else
+            let success+=1        #＜==返回值不为0则不成立，即访问成功，将成功的次数加1。
+        fi
+        if [ $success -ge 1 ]     #＜==如果成功的次数大于等于1
+          then
+            echo success    #＜==则打印成功标识，这也可以用冒号（:）替代，不输出结果，这是为了观察方便。
+            exit 0                #＜==返回0值，退出脚本，表示检测成功。
+        fi
+        if [ $fails -ge 2 ]       #＜==如果失败的次数大于等于2，则报警。
+          then
+            Critical="sys is down."
+            echo $Critical|tee|mail -s "$Critical" abc@oldboyedu.com  #＜==输出并发邮件报警，这里需要单独配你自己的邮箱地址，别用作者这里写的。
+            exit 2
+        fi
+    done
+}
+CheckUrl   #＜==执行函数。
+
+####提示：实际上wget命令有自动重试的功能，--tries=1参数就是，这里以一个脚本为大家阐述编程思想及let的应用案例。
+####执行结果如下：
+[root@oldboy scripts]# sh 05_12_checkurl.sh
+success
+
+[root@oldboy scripts]# sh 05_12_checkurl.sh    #＜==当无法访问地址时会输出错误。
+sys is down.
+
+[root@oldboy scripts]# sh -x 05_12_checkurl.sh #＜==使用-x可以跟踪详细的执行过程。
++ CheckUrl
++ timeout=5
++ fails=0
++ success=0
++ true
++ wget --timeout=5 --tries=1 http://oldboy.old.51cto.com -q -O /dev/null   #＜==故意搞错地址。
++ '[' 4 -ne 0 ']'    #＜==返回值不是0，因此，将失败次数加1。
++ let fails=fails+1  #＜==访问失败后次数加1。
++ '[' 0 -ge 1 ']'
++ '[' 1 -ge 2 ']'    #＜==因为没有达到两次失败，因此不报警。
++ true
++ wget --timeout=5 --tries=1 http://oldboy.old.51cto.com -q -O /dev/null   #＜==继续第2次访问。
++ '[' 4 -ne 0 ']'
++ let fails=fails+1
++ '[' 0 -ge 1 ']'
++ '[' 2 -ge 2 ']'    #＜==若达到两次失败的阈值，则启动报警装置。
++ Critical='sys is down.'
++ echo sys is down.
+sys is down.
++ mail -s 'sys is down.' abc@oldboyedu.com
++ echo sys is down.
++ exit 2
 ================================================================================================================
 
 
