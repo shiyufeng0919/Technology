@@ -251,7 +251,7 @@ $ echo $varName #输出变量值
 
 4.一般环境变量被定义并保存在用户家目录下的.bash_profile文件或全局配置文件/etc/profile中
 
-**[环境变量含义1](images/环境变量含义1.jpeg) , [环境变量含义2](images/环境变量含义2.jpeg)**
+**![环境变量含义1](images/环境变量含义1.jpeg) , ![环境变量含义2](images/环境变量含义2.jpeg)**
 
 5.在查看设置的变量时，有3个命令可显示变量的值: set / env /declare(替代早期的typeset)
 
