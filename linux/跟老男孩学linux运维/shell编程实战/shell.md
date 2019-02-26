@@ -732,13 +732,19 @@ $ man bash  -> / Parameter Expansion  #搜索相关帮助内容
 
 ## 5.6 awk实现计算
 
-**[](examples/shell07.txt)**
+得用awk进行运算，适合小数和整数，特别是命令行计算。尤其是小数，运算很精确。
+
+**[awk实现计算](examples/shell07.txt)**
 
 ## 5.7 declare(同typeset)命令的用法
 
-**[](examples/shell07.txt)**
+**[delare（同typeset）命令的用法](examples/shell07.txt)** --此方法不常用，需要定义才能生效
 
 ## 5.8 $[]符号的运算示例
+
+**[关于$[]符号运算的示例如下](examples/shell07.txt)**
+
+**[有关用Shell脚本实现杨辉三角的细节和3个实例请参见老男孩的博文](http://oldboy.blog.51cto.com/2561410/756234)**
 
 ## 5.9 基于shell变量输入read命令的运算实践
 
