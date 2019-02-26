@@ -420,12 +420,353 @@ sys is down.
 + exit 2
 ================================================================================================================
 
+##范例5-13：expr命令运算用法实践
+
+[root@oldboy scripts]# expr 2 + 2
+4
+
+[root@oldboy scripts]# expr 2 - 2
+0
+
+[root@oldboy scripts]# expr 2 ＊ 2     #＜==＊号用\来转义。
+expr： 语法错误
+
+[root@oldboy scripts]# expr 2 \＊ 2    # *号需要用/转义
+4
+
+[root@oldboy scripts]# expr 2 / 2
+1
+
+####要注意，在使用expr时：
+□运算符及用于计算的数字左右都至少有一个空格，否则会报错。
+□使用乘号时，必须用反斜线屏蔽其特定含义，因为Shell可能会误解星号的含义。
 
 ================================================================================================================
 
+##范例5-14：给自变量i加6
+
+[root@oldboy scripts]# i=5
+
+[root@oldboy scripts]# i=`expr $i + 6` #＜==注意用反引号将表达式引起来，变量和数字符号两边要有空格。
+
+[root@oldboy scripts]# echo $i
+11
+
+####注意：expr在Shell中可配合变量进行计算，但需要用反引号将计算表达式括起来。
 
 ================================================================================================================
 
+##范例5-15：通过expr判断变量或字符串是否为整数
+
+[root@oldboy scripts]# i=5                        #＜==赋值一个数5给i。
+
+[root@oldboy scripts]# expr $i + 6 &＞/dev/null   #＜==把i和整数相加，&＞/dev/null表示不保留任何输出。
+
+[root@oldboy scripts]# echo $?                    #＜==输出返回值。"$?"获取执行上一个指令的执行状态返回值(0成功,非0失败)
+0     #＜==返回为0，则证明i的值为整数。
+
+[root@oldboy scripts]# i=oldboy                  #＜==此时赋值一个字符串给i。
+[root@oldboy scripts]# expr $i + 6 &＞/dev/null   #＜==同样把i和整数相加，不保留任何输出。
+[root@oldboy scripts]# echo $?    #＜==输出返回值。
+2  #＜==返回为非0，则证明i的值不是整数，因为赋值的是oldboy
+
+结论：利用expr做计算，将一个未知的变量和一个已知的整数相加，看返回值是否为0，如果为0就认为做加法的变量为整数，否则就不是整数。
+
+================================================================================================================
+
+##范例5-16：通过传参判断输出内容是否为整数
+
+[root@oldboy scripts]# cat 05_16_expr.sh
+#! /bin/sh
+expr $1 + 1 ＞/dev/null 2＞&1
+[ $? -eq 0 ] &&echo int||echo chars  #＜==这是一个条件表达式语法，返回值为0，则输出int，否则输出chars。
+
+[root@oldboy scripts]# sh 05_16_expr.sh oldboy   #＜==传入oldboy字符。
+chars  #＜==返回的是字符
+
+[root@oldboy scripts]# sh 05_16_expr.sh 119      #＜==传入119。
+int  #＜==返回的是数字
+
+================================================================================================================
+
+##范例5-17：通过read读入持续等待输入例子（此为范例5-16的加强版）
+
+[root@oldboy scripts]# cat judge_int.sh
+#! /bin/sh
+while true
+do
+    read   -p "Pls input:" a
+    expr $a + 0 ＞/dev/null 2＞&1
+    [ $? -eq 0 ] && echo int || echo chars   #"$?"若上一条命令执行成功则返回0否则非0
+done
+
+执行结果如下：
+
+[root@oldboy scripts]# sh judge_int.sh
+Pls input:oldgirl
+chars
+Pls input:120
+int
+Pls input:
+
+================================================================================================================
+
+##范例5-18：将前文的混合运算小程序改成输入两个参数后进行计算的程序，并且要能判断传参的个数及通过expr判断传入的参数是否为整数。
+
+待使用的脚本如下：
+[root@oldboy scripts]# cat test.sh
+#! /bin/bash
+a=6    #＜==在脚本中定义a和b两个变量并分别赋值。
+b=2
+echo "a-b=$(($a-$b))"  #＜==对定义的变量值进行四则运算，并通过表达式的形式输出，下同。
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+这道题可以使用游戏过关的思想来编程解决。
+编程思路：
+第一关，判断参数个数是否为2，若不是，则给出提示终止运行。
+第二关，判断传入的参数是否为整数，若不是，则给出提示终止运行。
+第三关，做运算。
+
+####参考答案1：
+
+[root@oldboy scripts]# cat 05_18_1.sh
+#! /bin/bash
+#no.1
+[ $# -ne 2 ] &&{                      #＜==对传入参数的个数进行判断，是否等于2。
+    echo $"USAGE $0 NUM1 NUM2"        #＜==若不满足条件，则打印提示。
+    exit 1                            #＜==以返回值1退出脚本，表示脚本执行错误。
+}
+#no.2
+a=$1                                  #＜==获取脚本传参的$1并赋值给a。
+b=$2                                  #＜==获取脚本传参的$2并赋值给b。
+expr $a + $b + 110 &＞/dev/null       #＜==将两个参数一起和110相加。
+if [ $? -ne 0 ] #＜==如果返回值不为0，则至少有一个不是整数。
+  then
+    echo "you must input two nums." #＜==打印提示。
+    exit 2    #＜==以返回值2退出脚本，表示脚本执行错误，为什么不用1呢，这里是为了区分前
+                  面的1，便于调试。
+fi
+#no.3
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+####执行结果如下：
+
+[root@oldboy scripts]# sh 05_18_1.sh
+USAGE 05_14_size.sh NUM1 NUM2
+[root@oldboy scripts]# sh 05_18_1.sh 8 2
+a-b=6
+a+b=10
+a＊b=16
+a/b=4
+a＊＊b=64
+a%b=0
+
+
+####参考答案2：
+[root@oldboy scripts]# cat 05_18_2.sh
+#! /bin/bash
+#no.1
+[ $# -ne 2 ] &&{
+    echo $"USAGE $0 NUM1 NUM2"
+    exit 1
+}
+#no.2
+a=$1
+b=$2
+expr $a + 1 &＞/dev/null                        #＜==将第一个变量和整数相加。
+RETVAL_A=$?                                     #＜==获取返回值。
+expr $b + 1 &＞/dev/null                        #＜==将第二个变量和整数相加。
+RETVAL_B=$?                                    #＜==获取返回值。
+if [ $RETVAL_A -ne 0 -o $RETVAL_B -ne 0 ]      #＜==对两个变量通过expr加和过的返回值进行判断。
+  then
+    echo "you must input two nums."
+    exit 2
+fi
+#no.3
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+此外，用expr match功能进行整数判断时，可执行man expr命令获得帮助，如下：
+[root@oldboy scripts]# cat t1.sh
+if [[ `expr match "$1" "[0-9][0-9]＊$"` == 0 ]]
+  then
+    echo "$1 is not a num"
+else
+    echo "$1 is a num"
+fi
+
+####测试结果如下：
+[root@oldboy scripts]# sh t1.sh 11
+11 is a num
+
+[root@oldboy scripts]# sh t1.sh oldboy
+oldboy is not a num
+
+[root@oldboy scripts]# sh t1.sh 31333741@qq.com
+31333741@qq.com is not a num
+
+================================================================================================================
+
+##范例5-19：通过expr判断文件扩展名是否符合要求
+
+[root@oldboy scripts]# cat expr1.sh
+#! /bin/sh
+if expr "$1" : ".＊\.pub" &＞/dev/null
+  then
+    echo "you are using $1"
+else
+    echo "pls use ＊.pub file"
+fi
+
+[root@oldboy scripts]# sh expr1.sh id_dsa.pub
+you are using id_dsa.pub
+
+[root@oldboy scripts]# sh expr1.sh id_dsa
+pls use ＊.pub file
+
+================================================================================================================
+
+##范例5-20：使用expr命令实现系统ssh服务自带的ssh-copy-id公钥分发脚本
+
+[root@oldboy scripts]# sed -n '10,20p' `which ssh-copy-id`
+if [ "-i" = "$1" ]; then
+  shift
+  # check if we have 2 parameters left, if so the first is the new ID file
+  if [ -n "$2" ]; then
+    if expr "$1" : ".＊\.pub" ＞ /dev/null ; then #＜==判断脚本传入的$1是否符合.pub扩展名。
+#  man expr结果。
+# STRING : REGEXP
+# anchored pattern match of REGEXP in STRING
+      ID_FILE="$1"
+    else
+      ID_FILE="$1.pub"    #＜==如果扩展名不符合要求，则自动加上扩展名，以防止用户发送私钥。
+    fi
+    shift                 # and this should leave $1 as the target name
+  fi
+
+================================================================================================================
+
+##范例5-21：利用expr计算字符串的长度
+
+[root@oldboy scripts]# char="I am oldboy"
+
+[root@oldboy scripts]# expr length "$char"  #＜==利用expr的length函数计算字符串长度。
+11
+[root@oldboy scripts]# echo ${#char}        #＜==计算变量子串长度的方法。
+11
+
+[root@oldboy scripts]# echo ${char}|wc -L    #＜==wc方法
+11
+
+[root@oldboy scripts]# echo ${char}|awk '{print length($0)}' #＜==利用awk的length函数来计算字符串的长度。
+11
+
+================================================================================================================
+
+##范例5-22：请编写Shell脚本，打印下面语句中字符数不大于6的单词
+I am oldboy linux welcome to our training
+
+[root@oldboy scripts]# cat word_length.sh
+for n in I am oldboy linux welcome to our training
+do
+    if [ `expr length $n` -le 6 ]  #＜==利用expr的length函数计算字符串长度，并输出长度不大于6的字符串。
+      then
+        echo $n
+    fi
+done
+
+执行结果如下：
+[root@oldboy scripts]# sh word_length.sh
+I
+am
+oldboy
+linux
+to
+our
+
+================================================================================================================
+
+##范例5-23：将bc作为计算器来应用
+
+[root@oldboy scripts]# bc           #＜==执行bc后，交互式计算。
+bc 1.06.95qqe
+Copyright 1991-1994, 1997, 1998, 2000, 2004, 2006 Free Software Foundation, Inc.
+This is free software with ABSOLUTELY NO WARRANTY.
+For details type `warranty'.
+1+1                                                        #＜==输入1+1，按回车键计算。
+2
+3＊3                                                       #＜==输入3+3回车后计算。
+9
+
+================================================================================================================
+
+##范例5-24：将bc用在命令行下面，以实现运算功能
+
+[root@oldboy scripts]# echo 3+5|bc
+8
+
+[root@oldboy scripts]# echo 3.3+5.5|bc
+8.8
+
+[root@oldboy scripts]# echo 8.8-5.5|bc
+3.3
+
+[root@oldboy scripts]# echo "scale=2;355/113"|bc   #＜==使用scale=2保留两位小数。
+3.14
+
+[root@oldboy scripts]# echo "scale=6;355/113"|bc   #＜==使用scale=6保留6位小数。
+3.141592
+
+利用bc配合变量运算：
+
+[root@oldboy scripts]# i=5
+
+[root@oldboy scripts]# i=`echo $i+6|bc`  #＜==利用echo输出表达式，通过管道交给bc计算。此方法效率较低。
+[root@oldboy scripts]# echo $i
+11
+
+####提示：根据bc所具有的特殊性来看，如果是小数，则选择bc运算没有问题（老男孩推荐awk）；若是整数场景，可用“(())”、let、expr等。
+
+================================================================================================================
+
+##范例5-25：通过一条命令计算输出1+2+3+…+10的表达式，并计算出结果，请使用bc命令计算。输出内容如1+2+3+4+5+6+7+8+9+10=55。
+
+这里生成1+2+3+4+5+6+7+8+9+10表达式的方法有：
+
+[root@oldboy scripts]# seq -s "+" 10    #＜== seq是生成数字序列，-s是指定数字序列之间的分隔符。
+1+2+3+4+5+6+7+8+9+10
+
+[root@oldboy scripts]# echo {1..10}|tr " " "+"  #＜=={1..10}是生成以空格为间隔的数字序列，并交给tr将空格替换为+号。
+1+2+3+4+5+6+7+8+9+10
+
+实现本题的多种方法如下：
+[root@oldboy scripts]# echo `seq -s '+' 10`=`seq -s "+" 10|bc`    #＜==使用bc计算
+1+2+3+4+5+6+7+8+9+10=55
+
+[root@oldboy scripts]# echo "`seq -s '+' 10`="$((`seq -s "+" 10`))  #＜==使用“(())”计算
+1+2+3+4+5+6+7+8+9+10=55
+
+[root@oldboy scripts]# echo `seq -s '+' 10`=`seq -s " + " 10|xargs expr`  #＜==使用expr计算
+1+2+3+4+5+6+7+8+9+10=55
+
+[root@oldboy scripts]# echo `seq -s "+" 10`=$(echo $[`seq -s "+" 10`])    #＜==使用$[]计算
+1+2+3+4+5+6+7+8+9+10=55
+
+####bc命令的独有特点是除了支持整数运算之外，还支持小数运算。
+
+================================================================================================================
 
 ================================================================================================================
 
