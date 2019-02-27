@@ -857,12 +857,229 @@ done
 
 ================================================================================================================
 
+##范例5-26：实现read的基本读入功能
+
+####语法格式：read [参数] [变量名]
+
+####常用参数如下：
+□-p prompt：设置提示信息。
+□-t timeout：设置输入等待的时间，单位默认为秒。
+
+[root@oldboy scripts]# read -t 10 -p "Pls input one num:" num   #＜==读入一个输入，赋值给num变量，注意，num变量前需要有空格。
+Pls input one num:18                #＜==输出数字18，相当于把18赋值给num变量。
+
+[root@oldboy scripts]# echo $num    #＜==输出变量值。
+[root@oldboy scripts]# read -p "please input two number:" a1 a2   #＜==读入两个输入，注意要以空格隔开，分别赋值给a1和a2变量，a1变量前后都需要有空格。
+please input two number:1 2
+
+[root@oldboy scripts]# echo $a1
+1
+
+[root@oldboy scripts]# echo $a2
+2
+
+提示：read的读入功能就相当于交互式接受用户输入，然后给变量赋值。
+
+####上面read -p的功能可以用echo和read来实现，如下：
+
+echo -n "please input two number:"
+read a1 a2
+
+以上两句和下面的命令相当（-t排除在外）。
+
+read -t 5 -p "please input two number:" a1 a2    #5秒超时退出
 
 ================================================================================================================
 
+##范例5-27：把前面加减乘除计算传参的脚本改成通过read方式读入整数变量。
+
+####语法格式：read [参数] [变量名]
+
+####常用参数如下：
+□-p prompt：设置提示信息。
+□-t timeout：设置输入等待的时间，单位默认为秒。
+
+####原始脚本如下：
+#! /bin/bash
+a=$1
+b=$2
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+####解答：
+[root@oldboy scripts]# cat test_2.sh
+#! /bin/bash
+read -t 15 -p "please input two number:" a b  #＜==去掉原脚本中a和b的定义，通过read读入即可。
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+[root@oldboy scripts]# sh test_2.sh
+please input two number:10 5
+a-b=5
+a+b=15
+a＊b=50
+a/b=2
+a＊＊b=100000
+a%b=0
+
+####下面是初学者的多种典型错误案例，大家一起来找茬。
+#####典型错误案例1：
+#! /bin/bash
+a=$1 #＜==将$1赋值给a，脚本传参和read读入，保留一种即可，这里该删掉。
+b=$2 #＜==将$2赋值给b，脚本传参和read读入，保留一种即可，这里该删掉。
+read -p "pls input"  #＜==这里的read没有用了，而且没有变量可接收用户输入。
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+####错误在于：没有搞懂read的用法，并且将传参和read混用了。
+
+#####典型错误案例2：
+[root@mysql oldboy]# vim a.sh
+#! /bin/bash
+read -p "pls input": "$1" "$2"  #＜==$1和$2本来是有特定功能的变量，不能用其作为变量来接收read读入。
+a=$1  #＜==脚本传参和read读入，保留一种即可，这里该删掉。
+b=$2  #＜==脚本传参和read读入，保留一种即可，这里该删掉。
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+###错误在于：没有搞懂read用法，read后面接的是普通变量，并且将传参和read混用了，传参和read可以理解为是两种变量赋值的方法，使用其一即可。
+
+#####典型错误案例3：
+#! /bin/bash
+a=$1  #＜==脚本传参和read读入，保留一种即可，这里该删掉。
+b=$2  #＜==脚本传参和read读入，保留一种即可，这里该删掉。
+read -p "diyige":$a #＜==作为接收read的变量，不该带$符号。
+read -p "dierge":$b #＜==作为接收read的变量，不该带$符号。
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+echo yigong=${#}
 
 ================================================================================================================
 
+##范例5-29。若前面范例5-27中读入的不是整数或输入的数字个数不是2，如何解决?
+
+第一关：若用户按要求输入了两个值，则过关，否则game over。编程提示：可以用变量的子串长度知识，例如：${#OLDBOY}。
+第二关：用户输入的内容均为整数，才能过关，否则game over。编程提示：用expr或其他特殊技巧进行判断。
+第三关：当读入的参数符合个数和整数条件时，进行计算。
+
+解答过程如下。
+
+####以read命令进行读入判断。
+
+[root@oldboy scripts]# cat read_size01.sh
+#! /bin/bash
+read -t 15 -p "Please input two number:" a b
+#no1
+[ ${#a} -le 0 ]&&{     #＜==利用条件表达式，根据变量值的长度是否小于0，来确定第一个数是否为空。
+    echo "the first num is null"
+    exit 1
+}
+[ ${#b} -le 0 ]&&{     #＜==利用条件表达式，根据变量值的长度是否小于0，来确定第二个数是否为空。
+    echo "then second num is null"
+    exit 1
+}
+#no2         #＜==这里的用法在前面已详细注释过，因此这里不再注释。
+expr $a + 1 &＞/dev/null
+RETVAL_A=$?
+expr $b + 1 &＞/dev/null
+RETVAL_B=$?
+if [ $RETVAL_A -ne 0 -o $RETVAL_B -ne 0 ]; then
+    echo "one of the num is not num, pls input again."
+    exit 1
+fi
+#no.3
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a/b=$(($a/$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+echo "a%b=$(($a%$b))"
+
+####执行结果如下：
+[root@oldboy scripts]# sh read_size01.sh
+Please input two number:qq                #＜==若输入非数字，则会报错。
+then second num is null
+
+[root@oldboy scripts]# sh read_size01.sh
+Please input two number:qq dd
+one of the num is not num, pls input again.
+
+[root@oldboy scripts]# sh read_size01.sh
+Please input two number:12 6
+a-b=6
+a+b=18
+a＊b=72
+a/b=2
+a＊＊b=2985984
+a%b=0
+
+####再来思考一下：如何将上述read读入改用脚本传参的方法来实现呢？
+
+[root@oldboy scripts]# cat read_size02.sh
+#! /bin/bash
+a=$1                                          #＜==将$1赋值给a。
+b=$2                                          #＜==将$2赋值给b。
+Usage(){                                      #＜==定义帮助函数。
+    echo $"USAGE:sh $0 num1 num2"             #＜==输出帮助，$0表示脚本名。
+    exit 1                                    #＜==以1作为返回值退出脚本。
+}
+if [ $# -ne 2 ]; then                         #＜==参数个数不等于2，打印帮助。
+    Usage
+fi
+expr $a + 1 ＞/dev/null 2＞&1
+[ $? -ne 0 ] && Usage
+expr $b + 0 ＞/dev/null 2＞&1         #＜==这个地方使用的加0，是为了防止b为0而导致被除数为0。
+[ $? -ne 0 ] && Usage
+#no.3
+echo "a-b=$(($a-$b))"
+echo "a+b=$(($a+$b))"
+echo "a＊b=$(($a＊$b))"
+echo "a＊＊b=$(($a＊＊$b))"
+if [ $b -eq 0 ]                      #＜==这个地方对b做了个判断，防止被除数为0，算是个保险吧，可能用不上。
+  then
+    echo "your input does not allow to run."
+    echo "a/b =error"
+    echo "a%b =error"
+else
+    echo "a/b =$(($a/$b))"
+    echo "%b =$(($a%$b))"
+fi
+
+####执行结果如下：
+
+[root@oldboy scripts]# sh read_size02.sh
+USAGE:sh read_size02.sh num1 num2
+[root@oldboy scripts]# sh read_size02.sh 7 oldboy
+USAGE:sh read_size02.sh num1 num2
+[root@oldboy scripts]# sh read_size02.sh 7 3
+a-b=4
+a+b=10
+a＊b=21
+a＊＊b=343
+a/b =2
+a%b =1
+[root@oldboy scripts]# sh read_size02.sh 7 0
+USAGE:sh read_size02.sh num1 num2
 
 ================================================================================================================
 
