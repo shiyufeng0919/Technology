@@ -37,10 +37,7 @@
 
 ![image](resources/images/1.jpg)
 
-$ ls -al  #列出所有文件详细权限与属性(包含隐藏文件，即文件名第一个字符为[.]的文件)  
-            (连接数)                               (文件最后被修改的时间)
-drwxr-xr-x   5 shiyufeng  JDJR\Domain Users  160 Feb 28 11:22 linux
-(文件类型权限)   (文件拥有者)  (文件所属群组)    (文件容量)            (文件名)
+![image](resources/images/2.jpg)
 
 
 
