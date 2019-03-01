@@ -882,7 +882,33 @@ test -f /tmp/hello.txt || echo 0  #若表达式失败，则输出0 "||"代表前
 
 + 测试shell变量示例
 
+  **[范例6-8：对单个文件变量进行测试](examples/shell08.txt)**
+  
+  **[范例6-9：对单个目录或文件进行测试](examples/shell08.txt)**
+  
+  **[范例6-10：测试时变量的特殊写法及问题](examples/shell08.txt)**
+  
+  **[范例6-11：在生产环境下，系统NFS启动脚本的条件测试](examples/shell08.txt)**
+  
+  **[范例6-12：实现系统bind启动脚本named（bind DNS服务）](examples/shell08.txt)**
+  
+  **[范例6-13：写出简单高效的测试文件](examples/shell08.txt)**
+  
+  **[范例6-14：实现系统脚本/etc/init.d/nfs](examples/shell08.txt)**
+
 ### 6.2.3 特殊条件测试表达式案例
+
+以下写法适用于所有的条件测试表达式，是工作中常用的替代if语句的方法。
+
+例如：当条件1成立时，同时执行命令1，命令2，命令3。不用if测试表达式格式如下：
+
+![image](images/1.jpg)
+
+等价于
+
+![image](images/2.jpg)
+
+**[范例6-15：当条件不成立时，执行大括号里的多条命令，这里要使用逻辑操作符“||”](examples/shell08.txt)**
 
 ## 6.3 字符串测试表达式
 
