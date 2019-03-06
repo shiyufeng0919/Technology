@@ -275,6 +275,101 @@
 
 -------------------------------------------------------------------
 
+# [第六章 linux档案与目录管理](http://linux.vbird.org/linux_basic/0220filemanager.php)
+
+**FHS(Filesystem Hierarchy Standard )标准**
+
+## 6.1 目录与路径
+
+### 6.1.1 相对路径与绝对路径
+
+#### 1.相对路径(相对于某一目录，如$ cd ../bin)
+
+#### 2.绝对路径(一定由根目录/写起,如$ cd /usr/share)
+
+**shell scripts中务必使用绝对路径(因工作环境不同，可能会导致一些问题发生)**
+
+### 6.1.2 目录的相关操作:cd / pwd / mkdir / rmdir
+
+#### 1.比较特殊的目录
+
+![](resources/images/18.jpg)
+
+**$ ls -al / #查询根目录下的所有文件信息。则.与..个目录属性与权限完一致，即根目录的上一层(..)与根目录自已(.)是同一个目录**
+
+![](resources/images/19.jpg)
+
+#### 2.常见处理目录指令
+
++ cd:变换目录 (change directory)
+
+  ![](resources/images/20.jpg)
+
++ pwd:显示当前的目录(print working directory)
+
+  ![](resources/images/21.jpg)
+  
+**$ ls -ld /var/mail/ #查看目录详细信息**
+
++ mkdir:建立一个新的目录(make directory)
+
+  ![](resources/images/22.jpg)
+  
+  **实例:**
+  
+  ![](resources/images/23.jpg)
+
++ rmdir:删除一个空的目录
+  
+  ![](resources/images/24.jpg)
+  
+  **实例:**
+  
+  ![](resources/images/25.jpg)
+
+### 6.1.3 关于执行档路径的变数: $PATH --环境变量
+
+**查阅档案属性指令ls,完整档名(/bin/ls)绝对路径.可在任意处执行ls,因为环境变量PATH**
+
+![](resources/images/26.jpg)
+
+## 6.2 档案与目录管理
+
+### 6.2.1 档案与目录的检视: ls
+
+![](resources/images/27.jpg)
+
+![](resources/images/28.jpg)
+
+![](resources/images/29.jpg)
+
+### 6.2.2 复制，删除与移动(cp,rm,mv)
+
++ cp命令： (copy) #复制 & 建立连结档(捷径)
+
+  ![](resources/images/30.jpg)
+  
+  ![](resources/images/31.jpg)
+  
+  ![](resources/images/32.jpg)
+  
+  ![](resources/images/34.jpg)
+  
++ mv命令： (move) # 移动 & 更名(rename)
+
++ rm命令： (remove) #移除档案或目录
+
+## 6.3 档案内容查阅
+
+## 6.4 档案与目录的预设权限与隐藏权限
+
+## 6.5 指令与档案的搜寻
+
+## 6.6 极重要的复习！权限与指令间的关系
+
+
+-------------------------------------------------------------------
+
 # [第十二章 学习shell scripts](http://linux.vbird.org/linux_basic/0340bashshell-scripts.php)
 
 
