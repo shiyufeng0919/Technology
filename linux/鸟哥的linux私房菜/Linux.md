@@ -355,13 +355,175 @@
   
   ![](resources/images/34.jpg)
   
-+ mv命令： (move) # 移动 & 更名(rename)
++ mv命令： (move) # 移动档案与目录 & 更名(rename)
+
+  mv [-fiu] source destination ##-f强制移动，不管是否已存在，会覆盖；-i询问是否覆盖；-u目标档存在则source比较新才移动
+  
+  ![](resources/images/35.jpg)
 
 + rm命令： (remove) #移除档案或目录
 
+### 6.2.3 取得路径的档案名称与目录名称
+
+  ![](resources/images/36.jpg)
+
 ## 6.3 档案内容查阅
 
+**查阅一个文档内容命令如下：**
+
++ 直接查阅一个档案内容: cat / tac / nl
+
+    + cat : 由第一行开始显示档案内容  (Concatenate连续->cat)(常用)
+    
+       ![](resources/images/37.jpg)
+    
+    + tac : 从最后一行开始显示，可以看出tac是cat的倒写($ tac readme.txt)
+    
+    + nl  : 显示的时候，顺便输出行号
+      
+       ![](resources/images/38.jpg)
+       
++ 可翻页查看档案内容: more / less
+    
+    + more: 一页一页的显示档案内容  (常用)
+    
+        $ more readme.txt  ## $ man more 
+        
+        **常用按键**
+        
+        + 空白键(space)：代表向下翻一页；
+        
+        + Enter ：代表向下翻『一行』；
+        
+        + /字串 ：代表在这个显示的内容当中，向下搜寻『字串』这个关键字；
+        
+        + :f ：立刻显示出档名以及目前显示的行数；
+        
+        + q ：代表立刻离开more ，不再显示该档案内容。
+        
+        + b 或[ctrl]-b ：代表往回翻页，不过这动作只对档案有用，对管线无用
+    
+    + less: 与more类似，但比more更好的是，可向前翻页  (常用)
+    
+        $ less readme.txt  ## $ man less
+        
+        **常用按键**
+        
+        + 空白键 ：向下翻动一页；
+        
+        + [pagedown]：向下翻动一页；
+        
+        + [pageup] ：向上翻动一页；
+        
+        + /字串 ：向下搜寻『字串』的功能；
+        
+        + ?字串 ：向上搜寻『字串』的功能；
+        
+        + n ：重复前一个搜寻(与/ 或? 有关！)
+        
+        + N ：反向的重复前一个搜寻(与/ 或? 有关！)
+        
+        + g ：前进到这个资料的第一行去；
+        
+        + G ：前进到这个资料的最后一行去(注意大小写)；
+        
+        + q ：离开less 这个程式；
+        
++ 摘取资料部分内容
+    
+    + head: 只看头几行 # $ head shell.txt
+    
+      **语法：head [-n number] 档案  # $ head -n 20 shell.txt (取文档前20行内容)**
+      
+      **语法：head [-n -number] 档案 # $ head -n -100 shell.txt(抛除后100行)**
+    
+    + tail: 只看尾几行 $ $ tail shell.txt
+    
+      **语法：tail [-n number] 档案**
+      
+    **示例：显示/etc/man_db.conf的第11-20行**
+    
+    $ head -n 20 /etc/man_db.conf | tail -n 10 #取前20行及后10行,其中"|"管线指令为前面指令输出的信息透过管线交由后续指令继续使用
+    
+    $ cat -n /etc/man_db.conf | head -n 20 | tail -n 10 #在上例基础上加行号
+
++ 非纯文字档
+
+    + od  : 以二进位的方式读取档案内容 (避免读取二进制档出现乱码问题)
+    
+    ![](resources/images/39.jpg)
+    
++ 修改档案时间或建置新档
+
+   + 时间参数意义
+   
+     + modification time(mtime) : 内容变化会更新该时间(注：非档案属性或权限修改)(重要)
+     
+     + status time(ctime): 该档案状态(属性/权限)更改时会更新该时间
+     
+     + access time(atime): 该档案内容被取用(如cat读取)，会更新该时间
+     
+     ![](resources/images/40.jpg)
+
+   + touch :(1)建立一个空的档案 (2)将某个档案日期修订为目前(mtime & atime)
+   
+     **注：复制一个档案，即使复制所有属性，但也不能复制ctime这个属性**
+   
+     ![](resources/images/41.jpg)
+     
+     ![](resources/images/42.jpg)
+
 ## 6.4 档案与目录的预设权限与隐藏权限
+
+**一个档案有若干属性(r,w,x)读写执行权限或(d/-/l)目录/文件连接档**
+
+**复习示例1:你的系统有个一般身份使用者syf,他的群组属于syf,他的家目录在/home/syf。你是root,你想将你的~/.bashrc复制给他，怎么做？**
+
++ 复制档案： cp ~/.bashrc ~syf/bashrc
++ 修改属性： chown syf:syf ~syf/bashrc #syf:syf(所属者:群组)
+
+**复习示例2:在/tmp下创建一个目录，名为linux,该目录拥有者syf,群组root.另任何人都可进入该目录浏览档案，除syf可修改外，其他人都不能修改该目录下的档案**
+
++ 创建目录: mkdir /tmp/linux
++ 修改属性：chown -R syf:root /tmp/linux #-R递归，里面的所有文档均为该属性
++ 修改权限：chmod -R 755 /tmp/linux #具有权限应为drwxr-xr-x,即数字表示755(x:1/w:2/r:4)
+
+#### 6.4.1 档案预设权限: umask
+
+**umask:指定目前使用者在建立档案或目录时的权限预设值**
+
+ ![](resources/images/43.jpg)
+ 
++ 文档具有的最大权限:666(rw-rw-rw-),因为普通文档建立不应该有执行权限
+
++ 目录具有的最大权限:777(rwxrwxrwx)，因为要进入该目录必须有x权限
+
+ ![](resources/images/44.jpg)
+ 
++ umask的利用与重要性
+
+  + 022权限:所属用户-所属组-其他人(022),所属用户具有最高权限，所属组除去2(即w权限),具有rx权限(文档仅具有r,目录具有rx)，其他人除去2,同所属组.
+
+  + 场景：因新创建的文件unmask具有022权限，则同组其他人不可修改该文件(不能合作)
+
+  + 如何设定unmask: $ unmask 002 (文档具有最大权限:rw-rw-r--)(目录具有最大权限:rwxrwxr-x)
+
+  ![](resources/images/45.jpg)
+  
+**示例：假设你的umask为003,则该umask情况下，建立的档案与目录权限是？**
+
+umask=003(user/group/other),user=group具有最高权限，other除去3(x+w=1+2=3),因此仅具有r权限
+
++ 档案：-rw-rw-r--
+
++ 目录：drwxrwxr--
+
+#### 6.4.2 档案隐藏属性
+
+#### 6.4.3 档案特殊权限：SUID,SGID,SBIT
+
+#### 6.4.4 观察档案类型：file
+
 
 ## 6.5 指令与档案的搜寻
 
