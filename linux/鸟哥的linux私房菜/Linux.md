@@ -520,6 +520,16 @@ umask=003(user/group/other),user=group具有最高权限，other除去3(x+w=1+2=
 
 #### 6.4.2 档案隐藏属性
 
++ chattr(设定档案隐藏属性)
+
+**注意：chattr指令只能在Ext2/Ext3/Ext4的Linux传统档案系统上面完整生效**
+
+![](resources/images/46.jpg)
+
++ lsattr(显示档案隐藏属性)
+
+![](resources/images/47.jpg)
+
 #### 6.4.3 档案特殊权限：SUID,SGID,SBIT
 
 #### 6.4.4 观察档案类型：file
