@@ -737,6 +737,73 @@ $ find /etc/ size +50k #大于50k以上的档案
 ### 11.找出/etc 底下，容量大于1500K 以及容量等于0 的档案
 
 
+# 命令
+
+    + locate命令:搜索文件 --速度快,但只可以按文件名搜索
+    
+      locate install.log   //搜索日志文件(对于新创建的文件搜索不到，搜索的是后台数据库(不是实时更新))
+        
+    + whereis与which:搜索系统命令
+     
+        whereis ls      //查看ls命令所在位置
+        
+        whereis -b ls   //只需要看ls在哪,不想看帮助文档
+        
+        where is -m ls  //只看帮助文档
+        
+        which ls    //查找ls命令所在位置，包括ls的别名（如:ll是ls -l的别名）
+    
+        whereis   //知道我在哪  
+        
+        whoami    //知道我是谁 shiyufeng(当前用户)
+        
+        whatis ls  //知道这个命令是做什么的
+        
+    + find命令：搜索文件  --速度慢,但可以按条件搜索文件
+    
+     【find命令】：完全区配
+    
+    find / -name filename.log   //查找名字是filename.log的文件(耗费环境,搜索了整个根"/")
+    
+    find /root -name "filename.log*"  //匹配任意内容（*）查找/root目录下
+    
+    find /root -name "ab[cd]"   //搜索abc或abd的文件
+    
+    find /root -name "*[cd]"   //搜索以c或d结尾的字符
+    
+    find /root -iname "abc"  //不区分大小写搜索abc文件
+    
+    find /root -nouser    //获取指定目录下没有所有者的文件(内核产生的文件/外来文件有可能没有所有者)
+    
+    按时间搜索:-mtime:修改文件内容。-ctime:改变文件属性。atime:文件访问时间
+    
+    find /var/log -mtime +10 //查找10天前修改的文件 +10:10天前 10:10天当天  -10:10天内
+    
+    按文件大小搜索:
+    
+    find /root -size +26k  //查找root目录下大于26k的文件 +10大于10 -10小于10 10等于10
+    
+    find /etc -size +2M    //查找etc目录下大于2M的文件
+    
+    find /root -size 25   //查找25个扇区的文件，因此单位不能省
+    
+    ls -i //获取i节点，根据I节点查找文件名
+    
+    find /root inum 节点号   //根据I节点，查找文件名
+    
+    find /etc -size +20k -a -size -50k   //查找/etc目录下大于20k且小于50k的文件 -a:and
+    
+    -exec将前面的结果，以ls -lh显示  {} \固定格式:
+    
+    find /etc -size +20k -a -size -50k -exec ls -lh {} \  //处理第一个结果以长格式显示
+    
+    【grep命令--搜索字符串】:包含区配
+    
+    grep "size" file.log    //查找file.log文件中包含size的行
+    
+    grep -v "size" file.log  //查找不包含size的行
+
+
 -------------------------------------------------------------------
 
 **[鸟哥的linux私房菜](http://linux.vbird.org/linux_basic_train/unit07.php)**
