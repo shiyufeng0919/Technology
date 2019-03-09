@@ -227,7 +227,37 @@
     
     bunzip2 filename.bz2   //[bunzip2 压缩文件]
 
+### 打包命令 tar
 
+    ###解决.gz和.bz2格式打包目录的问题（原理：先将文件打包，再压缩）
+    
+    (1).[.tar格式打包] 
+    
+    tar -cvf filename.tar filename  //打包文件[tar -cvf 打包文件名 源文件]
+    #-c:打包/-v：显示过程/-f：指定打包后的文件名    >可再用gzip压缩
+    
+    (2).[解打包命令]
+    
+    tar -xvf filename.tar  //tar -xvf 打包文件名 -x:解打包
+    
+    (3).打包&压缩(先打包.tar格式再压缩.gz格式)
+    
+    #打包压缩.tar.gz格式
+    tar -zcvf filename.tar.gz filename   //先打包再压缩(c:压缩)[tar -zcvf 压缩包名.tar.gz 源文件]
+    tar -zxvf filename.tar.gz    //解压缩[tar -zxvf 压缩包名.tar.gz]
+    
+    #多文件压缩
+    tar -zcvf /tmp/unionfile.tar.gz file1 file2 //将文件file1和file2一起压缩到目录tmp下
+    tar -zxvf unionfile.tar.gz  //解压缩
+    
+    #压缩.tar.bz2格式
+    tar -jcvf filename.tar.bz2 filename  //解压缩[tar -jcvf 压缩包名.tar.bz2 源文件]
+    tar -jxvf filename.tar.bz2           //解压缩[tar -jxvf 压缩包名.tar.bz2]
+    tar -jxvf filename.tar.bz2 -C /tmp/  //指定-C选项，解压缩位置
+    
+    #只看压缩包内容不解压缩
+    tar -ztvf filename.tar.gz  //只压缩包内容不解压缩 [t:test]
+    
 ------------------------------------------------
 
 
