@@ -25,8 +25,6 @@
 
 + linux所有组名 存储在=>/etc/group
 
--------------------------------------------
-
 ## 5.2 linux文件权限概念
 
 **注意：[Permission deny]即[肯定是权限设定错误]**
@@ -532,19 +530,214 @@ umask=003(user/group/other),user=group具有最高权限，other除去3(x+w=1+2=
 
 #### 6.4.3 档案特殊权限：SUID,SGID,SBIT
 
+**/tmp 与 /usr/bin/passwd特殊权限**
+
+![](resources/images/48.jpg)
+
++ Set UID
+
+  UID:s标志在档案拥有者x项目为SUID(仅作用于档案)
+
+  **上述$ ls -ld /usr/bin/passwd显示权限『-rw s r-xr-x』，x执行权限变为s,此时就被称为Set UID，简称为SUID的特殊权限**
+ 
+  ![](resources/images/49.jpg)
+  
++ Set GID
+
+  GID:s标志在群组x时为SGID(对档案与目录均可设定)
+  
+  ![](resources/images/50.jpg)
+  
+  + 设定档案具有如下功能
+  
+    + SGID 对二进位程式有用；
+    + 程式执行者对于该程式来说，需具备x 的权限；
+    + 执行者在执行的过程中将会获得该程式群组的支援！
+  
+  + 设定目录具有如下功能
+  
+    + 使用者若对于此目录具有r 与x 的权限时，该使用者能够进入此目录；
+    + 使用者在此目录下的有效群组(effective group)将会变成该目录的群组；
+    + 用途：若使用者在此目录下具有w 的权限(可以新建档案)，则使用者所建立的新档案，该新档案的群组与此目录的群组相同。
+
++ Sticky Bit (只针对目录有效)
+
+    + 当使用者对于此目录具有w, x 权限，亦即具有写入的权限时；
+    + 当使用者在该目录下建立档案或目录时，仅有自己与root 才有权力删除该档案 
+    
+举例来说:我们的/tmp 本身的权限是『drwxrwxrwt』， 在这样的权限内容下，任何人都可以在/tmp 内新增、修改档案，但仅有该档案/目录建立者与root 能够删除自己的目录或档案
+  
++ SUID/SGID/SBIT 权限设定
+
+  + 4 为SUID  #仅可设定文档
+  + 2 为SGID  #既可设定文档也可设定目录
+  + 1 为SBIT  #仅可设定目录
+  
+**假设要将一个档案权限改为『-rwsr-xr-x』时，由于s 在使用者权限中，所以是SUID,因此,在原先的755 之前还要加上4 ，也就是：『 chmod 4755 filename 』来设定**
+  
+  + 数字权限
+
+![](resources/images/51.jpg)
+
+  + 符号权限
+  
+![](resources/images/52.jpg)
+
 #### 6.4.4 观察档案类型：file
 
+**$ file xx #查看档案属于ASCII/data档案/binary等**
+
+![](resources/images/53.jpg)
+![](resources/images/54.jpg)
 
 ## 6.5 指令与档案的搜寻
 
+#### 1.指令档名的搜寻:查询指令位置(如ls这个指令放在哪里)
+
++ which(寻找「执行档」)
+
+  ![](resources/images/55.jpg)
+  
++ type:可查找bash内置指令 
+
+#### 2.档案档名的搜寻
+
++ whereis (只在一些特定的目录中寻找档案档名) 快速
+
+![](resources/images/56.jpg)
+
++ locate / updatedb (利用资料库来搜寻档名) 快速
+
+![](resources/images/57.jpg)
+
+  + updatedb:根据/etc/updatedb.conf 的设定去搜寻系统硬碟内的档名，并更新/var/lib/mlocate 内的资料库档案；
+  
+  + locate:依据/var/lib/mlocate 内的资料库记载，找出使用者输入的关键字档名
+  
++ find (查找整个硬盘，速度慢，功能强大)
+
+  时间参数意义
+     
+   + modification time(mtime) : 内容变化会更新该时间(注：非档案属性或权限修改)(重要)
+   
+   + status time(ctime): 该档案状态(属性/权限)更改时会更新该时间
+   
+   + access time(atime): 该档案内容被取用(如cat读取)，会更新该时间
+
+![](resources/images/58.jpg)
+
+![](resources/images/59.jpg)
+
+![](resources/images/60.jpg)
+
+![](resources/images/61.jpg)
+
+![](resources/images/62.jpg)
+
+![](resources/images/63.jpg)
+
 ## 6.6 极重要的复习！权限与指令间的关系
+
+[假设系统中有两个帐号,分别是alex 与arod,这两个人除了自己群组之外还共同支援一个名为project 的群组。
+假设这两个用户需要共同拥有/srv/ahome/ 目录的开发权，且该目录不许其他人进入查阅。
+请问该目录的权限设定应为何？请先以传统权限说明，再以SGID 的功能解析](http://linux.vbird.org/linux_basic/0220filemanager.php)
+
+Step1:root用户-》创建群组project,创建两个账号alex & arod，并加入project群组
+
+![](resources/images/64.jpg)
+
+Step2:root用户-》创建开发所共同拥的的目录/src/ahome
+
+![](resources/images/65.jpg)
+
+Step3:root用户-》修改权限，上述所具有权限应为770
+
+![](resources/images/66.jpg)
+
+Step4:以两个普通用户身份登录验证(alex登录创建目录，arod登录查看并处理)
+
+![](resources/images/67.jpg)
+
+**上述应用rwx权限未达到预期,因为所创建的目录所属群组不是project而是alex，因此arod相当于其他人**
+
+Step5:root用户-》加入SGID 的权限在里面，并进行测试
+
+![](resources/images/68.jpg)
+
+
+## 6.7 简答题部分
+
+### 1.什么是绝对路径与相对路径
+
+绝对路径：『一定由根目录/ 写起』；相对路径：『不由/ 写起，而是由相对当前目录写起』
+
+### 2.如何更改一个目录的名称？例如由/home/test 变为/home/test2
+
+mv /home/test /home/test2
+
+### 3.PATH 这个环境变数的意义
+
+$PATH:配置环境变量，命令如ls,pwd可直接执行，即输入ls,会去PATH中查找
+
+### 4.umask 有什么用处与优点
+
+umask:指定目前使用者在建立档案或目录时的权限预设值,以下以目录为例(最高权限777)
+
+如 $ umask # 显示0022
+
+0022:
+
++ 第1个0为特殊权限(SUID/SGID/SBIT)
+    + 4 为SUID  #仅可设定文档
+    + 2 为SGID  #既可设定文档也可设定目录
+    + 1 为SBIT  #仅可设定目录
++ 第2个0为所属者(user)具有(rwx=7-0权限，即rwx)
++ 第3个2代表所属组(group)具有(rwx=7-2=5「r-x」)
++ 第4个2代表其他人(other)具有(rwx=7-2=5「r-x」)
+
+### 5.当一个使用者的umask 分别为033 与044 他所建立的档案与目录的权限为何
+
++ 目录：具有最大权限777(rwx)
+
+    $ umask 033 (rwxr--r--) 
+    
+    $ umask 044 (rwx-wx-wx)
+    
++ 文档：具有最大权限(666)(rw) (文档不用具有x权限)
+
+   $ umask 033 (rwx-wx-wx)
+   
+   $ umask 044 (rwxr--r--) 
+
+### 6.什么是SUID
+
+SUID:档案所具有的特殊权限，拥有s权限，可执行root相关操作(如修改密码，因密码文件只有root用户有权限，授权s权限后，普通用户也可操作该文件)
+
+### 7.当我要查询/usr/bin/passwd 这个档案的一些属性时(1)传统权限；(2)档案类型与(3)档案的隐藏属性，可以使用什么指令来查询？
+
+$ file user/bin/passwd # file观察档案类型
+
+### 8.尝试用find 找出目前linux 系统中，所有具有SUID 的档案有哪些
+
+$ find / -perm /4000  (特殊权限，所属用户权限，所属组权限，其他人权限)
+
+    + 4 为SUID  #仅可设定文档
+    + 2 为SGID  #既可设定文档也可设定目录
+    + 1 为SBIT  #仅可设定目录
+
+### 9.找出/etc 底下，档案大小介于50K 到60K 之间的档案，并且将权限完整的列出(ls -l)
+
+$ find /etc/ size 50k-60k
+
+$ find /etc/ size +50k #大于50k以上的档案
+
+### 10.找出/etc 底下，档案容量大于50K 且档案所属人不是root 的档名，且将权限完整的列出(ls -l)
+
+
+### 11.找出/etc 底下，容量大于1500K 以及容量等于0 的档案
 
 
 -------------------------------------------------------------------
-
-# [第十二章 学习shell scripts](http://linux.vbird.org/linux_basic/0340bashshell-scripts.php)
-
-
 
 **[鸟哥的linux私房菜](http://linux.vbird.org/linux_basic_train/unit07.php)**
 
