@@ -19,7 +19,7 @@ gin框架获取post请求的所有参数
 
 ## viper方便好用的Golang配置库(用于读取配置文件参数)
 
-**[Github-viper](https://github.com/spf13/viper) | [Viper示例](resources/gosrc/viper.txt)**
+**[Github-viper](https://github.com/spf13/viper) | [Viper示例](resources/gosrc/opFiles/viper.txt)**
 
     安装:go get github.com/spf13/viper
 
@@ -35,7 +35,7 @@ gin框架获取post请求的所有参数
 
 + log(原生)
 
-+ [beego logs](resources/gosrc/logs-beego.txt)
++ [beego logs](resources/gosrc/logs/logs-beego.txt)
 
     go get github.com/astaxie/beego
 
@@ -56,7 +56,7 @@ gin框架获取post请求的所有参数
 
 # golang项目应用
 
-## [golang实现文件的上传和下载](resources/gosrc/文件上传和下载.txt)
+## [golang实现文件的上传和下载](resources/gosrc/opFiles/文件上传和下载.txt)
 
 ## [JWT实现权限验证(Json web Token)](https://www.cnblogs.com/kaixinyufeng/p/9651304.html)
 
