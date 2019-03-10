@@ -1,13 +1,13 @@
 # [框架gin vs beego](https://www.imooc.com/video/18638)
 
-    go框架|支持MVC|支持正则路由|支持session|性能
-    :---:|:---:|:---:|:---:|:---:
-    beego|支持            |支持   | 支持|低
-    gin  |不支持，手动编写MVC|不支持 |不支持(依赖第三方支持session包)|高
+go框架|支持MVC|支持正则路由|支持session|性能
+:---:|:---:|:---:|:---:|:---:
+beego|支持            |支持   | 支持|低
+gin  |不支持，手动编写MVC|不支持 |不支持(依赖第三方支持session包)|高
 
 ## 一。beego框架 (大型项目应用)
 
-    **beego是典型的MVC框架**
+**beego是典型的MVC框架**
 
 ## 二。gin框架
 
