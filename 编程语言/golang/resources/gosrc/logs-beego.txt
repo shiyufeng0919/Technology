@@ -1,0 +1,70 @@
+package utils
+
+import (
+	"encoding/json"
+	"git.jd.com/baas/monitor/prometheus/model"
+	"github.com/astaxie/beego/logs"
+	"github.com/spf13/viper"
+)
+
+func InitLogger() {
+	logConfig := GetLoggerConfig()
+	// 输出到控制台
+	logs.SetLogger("console")
+	// 输出到文件
+	logs.SetLogger(logs.AdapterMultiFile, logConfig)
+	// 输出文件名和行号
+	logs.EnableFuncCallDepth(true)
+	// 日志深度
+	logs.SetLogFuncCallDepth(3)
+}
+
+func GetLoggerConfig() string {
+
+	logs.Info("###配置文件获取日志配置信息###", viper.GetStringMap("log"))
+
+	filename := viper.GetString("log.filename")
+	if filename == "" {
+		filename = "baas-monitor"
+	}
+
+	perm := viper.GetString("log.perm")
+	if perm == "" {
+		perm = "0660"
+	}
+
+	maxsize := viper.GetInt("log.maxsize")
+	if maxsize <= 0 {
+		maxsize = 1 << 28 // 最大256兆
+	}
+
+	level := viper.GetInt("log.level")
+	if level <= 0 {
+		level = 7
+	}
+
+	maxlines := viper.GetInt("log.maxlines")
+	if maxlines <= 0 {
+		maxlines = 1000000
+	}
+
+	daily := viper.GetBool("log.daily")
+	maxdays := viper.GetInt("log.maxdays")
+	if maxdays <= 0 {
+		maxdays = 30
+	}
+	separate := viper.GetStringSlice("log.separate")
+	if separate == nil {
+		separate = []string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}
+	}
+
+	logModel := &model.LogModel{Filename: filename, Perm: perm, MaxSize: maxsize, Level: level, Maxlines: maxlines, Daily: daily, Maxdays: maxdays, Separate: separate}
+
+	logbyte, err := json.Marshal(logModel)
+	if err != nil {
+		logs.Error("###日志解析错误###", err)
+	}
+	logs.Info("###logbyte###", string(logbyte))
+
+	return string(logbyte)
+}

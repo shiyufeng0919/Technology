@@ -1,3 +1,13 @@
+# git学习网址
+
+## [git pro中文版](https://gitee.com/progit/)
+
+## [廖雪峰](https://www.liaoxuefeng.com/)
+
+## [Linux终端复用神器-Tmux使用梳理](http://www.cnblogs.com/kevingrace/p/6496899.html)
+
+$ tmux #进入tmux模式  $ exit #退出tmux模式
+
 # git常用命令
 
 ## git操作远程仓库相关命令

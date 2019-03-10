@@ -1,0 +1,336 @@
+/*
+  viper:用于读取配置文件config.yaml获取各参数信息
+*/
+
+#############################################################################################################################
+
+*****viper特性：
++ 设置默认值
++ 可以读取如下格式的配置文件：JSON、TOML、YAML、HCL
++ 监控配置文件改动，并热加载配置文件
++ 从环境变量读取配置
++ 从远程配置中心读取配置（etcd/consul），并监控变动
++ 从命令行 flag 读取配置
++ 从缓存中读取配置
++ 支持直接设置配置项的值
+
+*****Viper的读取顺序：
++ viper.Set() 所设置的值
++ 命令行 flag
++ 环境变量
++ 配置文件
++ 配置中心：etcd/consul
+
+*****Viper根据值类型获取值:
+Get(key string) : interface{}
+GetBool(key string) : bool
+GetFloat64(key string) : float64
+GetInt(key string) : int
+GetString(key string) : string
+GetStringMap(key string) : map[string]interface{}
+GetStringMapString(key string) : map[string]string
+GetStringSlice(key string) : []string
+GetTime(key string) : time.Time
+GetDuration(key string) : time.Duration
+IsSet(key string) : bool
+
+*****viper好文：
+
+【Golang中很好用的viper配置模块】https://blog.csdn.net/sd653159/article/details/83143760
+
+#############################################################################################################################
+
+示例1：viper读取配置文件--初始化后其他文件可直接用viper读取  (--参照简书(https://www.jianshu.com/p/a37d0b9439fa))
+
+      main.go入口直接调用InitConfig初始化即可 / InitConfig修改为init(),main包引入utils包，起名为_即可初始化ini方法.
+
+package utils
+
+import (
+	"fmt"
+	"github.com/astaxie/beego/logs"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+	"log"
+)
+
+//数据结构--文件名称
+type Config struct {
+	Name string //文件名
+	Type string //文件类型
+}
+
+func InitConfig(cfg string, filetype string) {
+
+	logs.Info("----------初始化配置文件---------")
+
+	//实例化结构体
+	c := Config{
+		Name: cfg,
+		Type: filetype,
+	}
+
+	//设置配置文件路径
+	viper.AddConfigPath("./prometheus/config/")
+
+	//设置配置文件名称
+	if c.Name != "" {
+		//若指定了配置文件，则解析指定的配置文件
+		viper.SetConfigName(c.Name)
+	} else {
+		//若未指定配置文件，则解析默认配置文件
+		viper.SetConfigName("config")
+	}
+
+	//设置配置文件格式
+	if c.Type != "" {
+		viper.SetConfigType(c.Type)
+	} else {
+		viper.SetConfigType("yaml")
+	}
+	viper.AutomaticEnv()
+
+	//viper解析配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("viper解析配置文件错误: %s \n", err))
+	}
+
+	//监听配置文件是否改变，用于热更新
+	c.watchConfig()
+}
+
+//监听配置文件是否改变，用于热更新
+func (c *Config) watchConfig() {
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Printf("config file changed:%s\n", e.Name)
+	})
+}
+
+//用于供其他文件获取配置文件属性值
+//=========获取DB信息==================================
+func GetDBUser() string {
+	log.Println("user:", viper.GetString("db.user"))
+	if viper.GetString("db.user") == "" {
+		return "root"
+	}
+	return viper.GetString("db.user")
+}
+func GetDBPwd() string {
+	log.Println("pwd:", viper.GetString("db.password"))
+	if viper.GetString("db.password") == "" {
+		return "root"
+	}
+	return viper.GetString("db.password")
+}
+func GetDBIp() string {
+	log.Println("ip:", viper.GetString("db.ip"))
+	if viper.GetString("ip") == "" {
+		return "127.0.0.1"
+	}
+	return viper.GetString("ip")
+}
+func GetDBPort() string {
+	log.Println("port:", viper.GetString("db.port"))
+	if viper.GetString("db.port") == "" {
+		return "3306"
+	}
+	return viper.GetString("db.port")
+}
+func GetDBDBName() string {
+	log.Println("DB:", viper.GetString("db.database"))
+	if viper.GetString("db.password") == "" {
+		return "mysql"
+	}
+	return viper.GetString("db.database")
+}
+func GetDBType() string {
+	log.Println("dbtype:", viper.GetString("db.type"))
+	if viper.GetString("db.type") == "" {
+		return "mysql"
+	}
+	return viper.GetString("db.type")
+}
+func GetDBSource() string {
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", GetDBUser(), GetDBPwd(), GetDBIp(), GetDBPort(), GetDBDBName())
+	log.Println("datasource:", dataSource)
+	fmt.Println("datasource:", dataSource)
+	return dataSource
+}
+
+//=========获取server信息==================================
+func GetServerPort() string {
+	log.Println("serverport:", viper.GetString("server.port"))
+	if viper.GetString("server.port") == "" {
+		return "8080"
+	}
+	return viper.GetString("server.port")
+}
+
+
+#############################################################################################################################
+
+示例2：此种方法是第一次深度有问题的方式，其他文件用viper读取出的都是空值。
+
+package utils
+
+import (
+	"fmt"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+	"log"
+)
+
+var (
+	setup *Setup  //定义全局变量,用于接书从viper中获取的数据
+)
+
+//定义结构体，与配置文件相对应
+type Setup struct {
+	DBConfig     map[string]string
+	ServerConfig map[string]string
+	LogConfig    map[string]string
+}
+
+//数据结构--文件名称
+type Config struct {
+	Name string //文件名
+	Type string //文件类型
+}
+
+//初始化配置
+func Init(cfg string, filetype string) error { //cfg:文件名称
+
+	log.Println("----------初始化配置文件---------")
+
+	//实例化结构体
+	c := Config{
+		Name: cfg,
+		Type: filetype,
+	}
+
+	//初始化配置文件
+	if err := c.initConfig(); err != nil {
+		log.Fatalf("初始化配置文件错误: %s \n", err.Error())
+		return err
+	}
+
+    //viper读取数据，为结构体设置值,并赋值给全局变量
+	setup = &Setup{
+		DBConfig:     viper.GetStringMapString("db"),
+		ServerConfig: viper.GetStringMapString("server"),
+		LogConfig: viper.GetStringMapString("log"),
+	}
+
+	log.Printf("config.db: %s \n", setup.DBConfig, ",config.server: %s \n", setup.ServerConfig)
+
+	//监听配置文件是否改变，用于热更新
+	c.watchConfig()
+
+	return nil
+}
+
+//初始化配置
+func (c *Config) initConfig() error {
+	//设置配置文件路径
+	viper.AddConfigPath("./prometheus/config/")
+
+	//设置配置文件名称
+	if c.Name != "" {
+		//若指定了配置文件，则解析指定的配置文件
+		viper.SetConfigName(c.Name)
+	} else {
+		//若未指定配置文件，则解析默认配置文件
+		viper.SetConfigName("config")
+	}
+
+	//设置配置文件格式
+	if c.Type != "" {
+		viper.SetConfigType(c.Type)
+	} else {
+		viper.SetConfigType("yaml")
+	}
+
+	//viper解析配置文件
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("viper解析配置文件错误: %s \n", err.Error())
+		return err
+	}
+	return nil
+}
+
+//监听配置文件是否改变，用于热更新
+func (c *Config) watchConfig() {
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Printf("config file changed:%s\n", e.Name)
+	})
+}
+
+//用于供其他文件获取配置文件属性值
+//=========获取DB信息==================================
+func GetDBUser() string {
+	log.Println("user:", setup.DBConfig["user"])
+	if setup.DBConfig["user"] == "" {
+		return "root"
+	}
+	return setup.DBConfig["user"]
+}
+func GetDBPwd() string {
+	log.Println("pwd:", setup.DBConfig["password"])
+	if setup.DBConfig["password"] == "" {
+		return "root"
+	}
+	return setup.DBConfig["password"]
+}
+func GetDBIp() string {
+	log.Println("ip:", setup.DBConfig["ip"])
+	if setup.DBConfig["ip"] == "" {
+		return "127.0.0.1"
+	}
+	return setup.DBConfig["ip"]
+}
+func GetDBPort() string {
+	log.Println("port:", setup.DBConfig["port"])
+	if setup.DBConfig["port"] == "" {
+		return "3306"
+	}
+	return setup.DBConfig["port"]
+}
+func GetDBDBName() string {
+	log.Println("DB:", setup.DBConfig["database"])
+	if setup.DBConfig["database"] == "" {
+		return "mysql"
+	}
+	return setup.DBConfig["database"]
+}
+func GetDBType() string {
+	log.Println("dbtype:", setup.DBConfig["type"])
+	if setup.DBConfig["type"] == "" {
+		return "mysql"
+	}
+	return setup.DBConfig["type"]
+}
+func GetDBSource() string {
+	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", GetDBUser(), GetDBPwd(), GetDBIp(), GetDBPort(), GetDBDBName())
+	log.Println("datasource:", dataSource)
+	return dataSource
+}
+//=========获取server信息==================================
+func GetServerPort() string {
+	log.Println("serverport:", setup.ServerConfig["port"])
+	if setup.ServerConfig["port"] == "" {
+		return "8080"
+	}
+	return setup.ServerConfig["port"]
+}
+
+
+#############################################################################################################################
+
+
+
+
+
+
+

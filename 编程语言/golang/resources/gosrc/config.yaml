@@ -1,0 +1,32 @@
+#===== 数据库相关配置开始 =================
+db:
+  type: mysql
+  user: root
+  password: shiyufeng
+  database: monitor
+  ip: 127.0.0.1
+  port: 3306
+
+#===== 服务相关配置开始 =================
+server:
+  port: 8085
+
+#===== 日志相关配置开始 =================
+log:
+  filename: "baas-monitor" #文件名
+  perm: "0660" #日志文件权限
+  maxsize: 268435456
+  level: 7 #日志显示级别
+  maxlines: 1000000 #文件最大行数
+  daily: true #是否按天回滚
+  maxdays: 30 #日志最多保存天数
+  separate:   # 写入文件级别
+    - "emergency"
+    - "alert"
+    - "critical"
+    - "error"
+    - "warning"
+    - "notice"
+    - "info"
+    - "debug"
+
