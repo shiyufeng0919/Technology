@@ -1,0 +1,92 @@
+package job
+
+import (
+	"fmt"
+	"github.com/astaxie/beego/logs"
+	"github.com/robfig/cron"
+	"github.com/spf13/viper"
+)
+
+var funcMap map[string]func()
+
+//初始化任务数据,添加执行的任务
+func init() {
+	funcMap = make(map[string]func()) //根据string,返回function
+	funcMap["func1"] = func1
+	funcMap["func2"] = func2
+	fmt.Println("funcMap:", funcMap)
+}
+
+//启动定时任务(从配置文件中获取待执行的任务和执行时间)
+func StartTimer() {
+
+	logs.Info("###加载job配置信息###", viper.Get("job."))
+
+	promJobs := viper.Get("jobs")
+
+	fmt.Println("promJob", promJobs) //[map[method:myFunc cron:*/1 * * * * ?] map[method:myFunc2 cron:*/1 * * * * ?]]
+
+	jobs := promJobs.([]interface{})
+
+	for _, promJob := range jobs {
+
+		fmt.Println("prometheus job:", promJob) //map[method:myFunc cron:*/1 * * * * ?]
+
+		job := promJob.(map[interface{}]interface{})
+
+		var execCron, execMethod string
+
+		if cron, ok := job["cron"]; ok {
+			execCron = cron.(string)
+			fmt.Println("cron:", execCron)
+
+		}
+
+		if method, ok := job["method"]; ok {
+			execMethod = method.(string)
+			fmt.Println("method:", execMethod)
+		}
+
+		spec := execCron
+		c := cron.New()
+		fmt.Println("execMethod", execMethod)
+
+		c.AddFunc(spec, getExecFunc(execMethod)) //execMethod是一个string,而AddFunc(cron,func)
+		c.Start() //启动计划任务
+	}
+}
+
+//从map中获取待执行的任务function
+func getExecFunc(funcname string) func() {
+	fmt.Println("funcMap["+funcname+"]=", funcMap[funcname])
+	for _, value := range funcMap {
+		fmt.Println("value:", value)
+	}
+	return funcMap[funcname]
+}
+
+func func1() {
+	fmt.Println("func1 exec")
+}
+
+func func2() {
+	fmt.Println("func2 exec")
+}
+
+---------------------------------------------------------------------------------------------
+
+#### main.go()中启一个goroutine
+
+func main() {
+
+	go job.StartTimer()
+
+	//释放database
+	defer database.DB.Close()
+
+	//初始化路由
+	router := router.InitRouter()
+
+	router.Run(":" + utils.GetServerPort())
+}
+

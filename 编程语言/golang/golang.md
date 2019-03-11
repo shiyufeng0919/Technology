@@ -60,6 +60,11 @@ gin框架获取post请求的所有参数
 
 ## [JWT实现权限验证(Json web Token)](https://www.cnblogs.com/kaixinyufeng/p/9651304.html)
 
+## [cron定时任务](resources/gosrc/jobs/cron.txt)
+
+**业务需求：定时调用prometheus接口获取监控指标.**
+
+**实现方案：1。独立启一个goroutine,与main并行执行 2。通过配置文件配置执行的方法与时间 3。go get github.com/robfig/cron**
 
 -----------------------------------------
 
