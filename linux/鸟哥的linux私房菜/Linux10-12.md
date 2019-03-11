@@ -143,12 +143,32 @@ Unix/Linux中主要两大类Shell:
 
 ### 8.变数内容的删除、取代与替换(Optional)
 
+#### (1)变数内容的删除
 
++ 变数内容的删除与取代
 
+**变数内容的删除：从前-》向删除(#与##号)(如PATH中各目录是以:号分隔，因此从/到:代表一个目录)**
 
+![](resources/images/113.jpg)
+![](resources/images/114.jpg)
+![](resources/images/115.jpg)
 
+**变数内容的删除：从后-》前删除(%与%%号)**
 
-  
+![](resources/images/116.jpg)
+
+![](resources/images/117.jpg)
+
+#### (2)变数内容的取代(/与//)
+
+![](resources/images/118.jpg)
+
+**总结:**
+
+![](resources/images/119.jpg)
+
+#### (3)变数的测试与内容替换
+
   
 [鸟哥的linux私房菜](http://linux.vbird.org/linux_basic/0320bash.php)
 
