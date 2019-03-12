@@ -169,8 +169,84 @@ Unix/Linux中主要两大类Shell:
 
 #### (3)变数的测试与内容替换
 
+![](resources/images/120.jpg)
+![](resources/images/121.jpg)
+![](resources/images/122.jpg)
+
+![](resources/images/123.jpg)
+
+![](resources/images/124.jpg)
+![](resources/images/125.jpg)
+
+## 三、命令别名与历史命令
+
+### 1.命令别名设定：alias ,unalias
+
+**命令别名：可直接下达该指令(与变数不同，变数需要echo呼出)**
+
+    $ alias #查看有哪些命令别名
+    $ alias lm='ls -al | more' # $ls -al | more 查询隐藏档，且需列出并一页一页翻看,为其设置别名为lm
+    $ alias rm='rm -i' #用于设定删除时，来确定是否要删除该档案（避免误删除-尤其root权限）
+    $ alias vi='vim' #命令行输入vi即为vim
+    $ unalias lm #取消别名
+    
+### 2.历史命令: history
+
+    $ alias h='history' #为历史命令设定别名,命令行可直接输入h查询历史命令
+
+![](resources/images/126.jpg)
+![](resources/images/127.jpg)
+
+### 3.同一账号同时多次登入history写入问题
+
+**同时开多个bash,则所有bash都有自己的记录写入记忆体。因登出时才更新记录档。则最后登出的那个bash会将前面的history覆盖掉**
+
+### 4.无法记录时间
+
+**无法记录指令的下达时间(可通过~/.bash_logout + date来增加时间参数)**
+
+## 四、Bash shell的操作环境
+
+### 1.路径与指令搜寻顺序
+
+    先alias 再builtin 再由$PATH 找到/bin/echo 
+    
+### 2.bash的进站与欢迎讯息
+
+### 3.bash的环境设定档
+
+#### (1)login与non-login shell
+
++ login shell:取得bash需要完整的登入流程
+
++ non-login shell:无需重新登入或在原bash上再启bash,则第二个bash称为non-login
+
+#### (2)环境设定档
+
++ /etc/profile:这是系统整体的设定，你最好不要修改这个档案
+
+  **login shell才会读**
+
++ ~/.bash_profile 或~/.bash_login 或~/.profile：属于使用者个人设定，你要改自己的资料，就写入这里
+
+  **在login shell的bash环境中，读取的个人偏好设定档主要有三个：**
+
+  + ~/.bash_profile(login shell才会读)
   
+  + ~/.bash_login
+  
+  + ~/.profile
+  
+  **login shell的设定档读取流程**
+  
+ ![](resources/images/128.jpg)
+  
+
 [鸟哥的linux私房菜](http://linux.vbird.org/linux_basic/0320bash.php)
+
+
+
+
 
 -----------------------
 
