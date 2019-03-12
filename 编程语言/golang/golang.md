@@ -29,7 +29,15 @@ gin框架获取post请求的所有参数
 
 [示例](https://blog.csdn.net/lengyuezuixue/article/details/79148762)
 
-### 二.sqlx
+### 二.sqlx框架
+
+### 三.gorm框架
+
++ 支持的数据库有：mysql、postgre、sqlite、sqlserver
+
++ 文档 [github](https://github.com/jinzhu/gorm) | [gorm](http://gorm.io/)
+
+### 四.xorm框架
 
 ## golang日志管理
 
