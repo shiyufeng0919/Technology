@@ -32,11 +32,11 @@ var Db *gorm.DB
 /*
 数据库表结构模型
 */
-type Bmonitor struct {
+type User struct {
 	ID         uint      `gorm:"primary_key"`
-	Type       string    `gorm:"type:varchar(255);not null"`
-	Val        float64   `gorm:"type:double(10,4);not null"`
-	OriginData string    `gorm:"type:text;not null"`
+	Name       string    `gorm:"type:varchar(255);not null"`
+	Salary        float64   `gorm:"type:double(10,4);not null"`
+	Comment  string    `gorm:"type:text;not null"`
 	CreateTime time.Time `gorm:"not null;DEFAULT CURRENT_TIMESTAMP"`
 }
 
@@ -44,7 +44,7 @@ func init() {
 
 	var err error
 
-	Db, err = gorm.Open("mysql", "root:shiyufeng@tcp(127.0.0.1:3306)/monitor?charset=utf8&parseTime=True&loc=Local")
+	Db, err = gorm.Open("mysql", "user:userpwd@tcp(127.0.0.1:3306)/dbname?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic(err)
@@ -67,11 +67,11 @@ func init() {
 */
 func CreateTableSchema(db *gorm.DB) error {
 
-	logs.Info("###创建Bmonitor数据库表结构###")
-	if true == db.HasTable(&Bmonitor{}) {
+	logs.Info("###创建数据库表结构###")
+	if true == db.HasTable(&User{}) {
 		return nil
 	}
-	dbRes := db.CreateTable(&Bmonitor{})
+	dbRes := db.CreateTable(&User{})
 	return dbRes.Error
 }
 
@@ -79,12 +79,12 @@ func CreateTableSchema(db *gorm.DB) error {
 
 ##业务写入数据###
 
-func InsertMetric(monitordata model.MonitorData) error{
+func InsertMetric(user model.User) error{
 
 	tx := database.Db.Begin()
 
 	//获取原始请求的json数据
-	jsonData, err := json.Marshal(monitordata)
+	jsonData, err := json.Marshal(user)
 
 	if err != nil {
 		logs.Error("将原结构体解析成json格式错误: %v", err)
@@ -95,14 +95,14 @@ func InsertMetric(monitordata model.MonitorData) error{
 	logs.Info("jsonData", string(jsonData))
 	fmt.Println("jsonData###", string(jsonData))
 
-	bmonitor:=&model.Bmonitor{
-		Type:monitordata.Data.ResultType,
+	user:=&User{
+		Type:user.Data.ResultType,
 		Val:12.3456,
 		OriginData:string(jsonData),
 		CreateTime:time.Now(),
 	}
 
-	if err:=tx.Create(bmonitor).Error;err!=nil{
+	if err:=tx.Create(user).Error;err!=nil{
 		fmt.Println("###写入数据错误###",err)
 		tx.Rollback()
 		return err
