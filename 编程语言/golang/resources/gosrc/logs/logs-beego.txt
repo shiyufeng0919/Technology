@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"git.jd.com/baas/monitor/prometheus/model"
 	"github.com/astaxie/beego/logs"
 	"github.com/spf13/viper"
 )

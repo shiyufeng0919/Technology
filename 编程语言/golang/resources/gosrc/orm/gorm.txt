@@ -2,14 +2,6 @@ main.go #入口文件
 ========================================================================================================================
 package main
 
-import (
-	router "git.jd.com/baas/monitor/prometheus/apis/routers"
-	"git.jd.com/baas/monitor/prometheus/common/job"
-	_ "git.jd.com/baas/monitor/prometheus/common/logger"
-	"git.jd.com/baas/monitor/prometheus/common/utils"
-	"git.jd.com/baas/monitor/prometheus/database"
-)
-
 func main() {
 
 	go job.StartTimer()
@@ -30,7 +22,6 @@ package database
 
 import (
 	"fmt"
-	"git.jd.com/baas/monitor/prometheus/common/utils"
 	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
