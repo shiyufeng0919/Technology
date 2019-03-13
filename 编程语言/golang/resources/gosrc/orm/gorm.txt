@@ -96,9 +96,9 @@ func InsertMetric(user model.User) error{
 	fmt.Println("jsonData###", string(jsonData))
 
 	user:=&User{
-		Type:user.Data.ResultType,
-		Val:12.3456,
-		OriginData:string(jsonData),
+		Name:"aa",
+		Salary:12.3456,
+		Comment:string(jsonData),
 		CreateTime:time.Now(),
 	}
 
