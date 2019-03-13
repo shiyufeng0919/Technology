@@ -62,3 +62,5 @@ func httpGet() {
 
 	logs.Info("###body###",string(body))  //可成功获取返回的数据
 
+========================================================================================
+其他:golang urlencode(https://www.cnblogs.com/kccdzz/p/7600835.html)
