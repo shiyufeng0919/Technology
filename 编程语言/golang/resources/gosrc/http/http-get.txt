@@ -1,0 +1,64 @@
+##get请求 (https://blog.csdn.net/feiwutudou/article/details/80965798)
+=========
+func httpGet() {
+    resp, err :=   http.Get("http://www.01happy.com/demo/accept.php?id=1")
+    if err != nil {
+        // handle error
+    }
+
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        // handle error
+    }
+
+    fmt.Println(string(body))
+}
+============
+
+## 项目应用(向prometheus发起get请求,获取数据)
+
+请求URL=http://192.168.xx.xx:30100/api/v1/query?query=(node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} - node_memory_MemFree_bytes{instance="192.168.xx.xx:9100"} - node_memory_Buffers_bytes{instance="192.168.xx.xx:9100"} - node_memory_Cached_bytes{instance="192.168.xx.xx:9100"}) / (node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} )
+--------------------
+    urls:=`http://192.168.xx.xx:30100/api/v1/query?query=(node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} - node_memory_MemFree_bytes{instance="192.168.xx.xx:9100"} - node_memory_Buffers_bytes{instance="192.168.xx.xx:9100"} - node_memory_Cached_bytes{instance="192.168.xx.xx:9100"}) / (node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} )`
+
+    resp, err :=   http.Get(urls)
+    if err != nil {
+        // handle error
+    }
+
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        // handle error
+    }
+
+    fmt.Println("body###",string(body))  //报404坏的请求。异常原因，上述""需要做转义。若将"换成同浏览器%样式即可
+
+--------------------
+「解决方案」golang url转义(https://segmentfault.com/q/1010000011288859)
+
+    urls:=`http://192.168.xx.xx:30100/api/v1/query?query=(node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} - node_memory_MemFree_bytes{instance="192.168.xx.xx:9100"} - node_memory_Buffers_bytes{instance="192.168.xx.xx:9100"} - node_memory_Cached_bytes{instance="192.168.xx.xx:9100"}) / (node_memory_MemTotal_bytes{instance="192.168.xx.xx:9100"} )`
+
+    u,_:=url.Parse(urls)
+
+	q:=u.Query()
+
+	u.RawQuery=q.Encode() //urlencode
+
+	resp,err:=http.Get(u.String())
+
+	if err!=nil{
+		logs.Error("###发送http get请求错误###",err)
+	}
+
+	defer resp.Body.Close()
+
+	body,err:=ioutil.ReadAll(resp.Body)
+
+	if err !=nil{
+		logs.Info("读取数据错误",err)
+	}
+
+	logs.Info("###body###",string(body))  //可成功获取返回的数据
+

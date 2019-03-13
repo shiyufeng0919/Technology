@@ -1,0 +1,61 @@
+###  post请求 golang<->java 传递&接收json格式数据  ###
+=======================================================================================
+
+「项目应用」golang->java(传递json数据) | java->golang(返回json数据)
+
+type ResultCfca struct {
+	Code int          `json:"code"`
+	Msg  string       `json:"msg"`
+	Data CfcaInfo `json:"data"`
+}
+
+type CfcaInfo struct{
+    xx string `db:"xx" josn:"xx"`
+    ......
+}
+
+func callJava(javaParam EnrollCfca) ResultCfca {
+	logger.Debugf("javaApplyCertUrl:%s", javaApplyCertUrl)
+	url := javaApplyCertUrl
+	logger.Debugf("url:%s", url)
+	contentType := "application/json;charset=utf-8"
+	javaJsonParam, errs := json.Marshal(javaParam) //转换成JSON返回的是byte[]
+	if errs != nil {
+		logger.Error(errs.Error())
+	}
+
+	logger.Debug("调用java传递参数:", string(javaJsonParam))
+
+	//发送请求
+	req, err := http.NewRequest("POST", url, strings.NewReader(string(javaJsonParam)))
+	if err != nil {
+		//panic(err)
+		logger.Errorf("获取连接失败:%s", err.Error())
+	}
+	req.Header.Set("Content-Type", contentType)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		//panic(err)
+		logger.Errorf("发送请求失败:%s", err.Error())
+	}
+	defer resp.Body.Close()
+	//响应
+	response, err := ioutil.ReadAll(resp.Body)
+	logger.Debug("返回响应:" + string(response))
+	if err != nil {
+		logger.Debug("Read failed:", err)
+		logger.Error("读取响应失败:", err)
+		return ResultCfca{}
+	}
+	logger.Debug("response:", string(response))
+	logger.Debug("响应结果:", string(response))
+
+	//返回结果
+	resultcfca := ResultCfca{}
+	json.Unmarshal([]byte(string(response)), &resultcfca) //json解析到结构体里面
+	logger.Debug("resultcfca", resultcfca)                //输入结构体
+	logger.Debug("code", resultcfca.Code)
+	return resultcfca
+}
+=======================================================================================

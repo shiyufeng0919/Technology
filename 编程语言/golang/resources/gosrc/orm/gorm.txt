@@ -1,0 +1,125 @@
+main.go #入口文件
+========================================================================================================================
+package main
+
+import (
+	router "git.jd.com/baas/monitor/prometheus/apis/routers"
+	"git.jd.com/baas/monitor/prometheus/common/job"
+	_ "git.jd.com/baas/monitor/prometheus/common/logger"
+	"git.jd.com/baas/monitor/prometheus/common/utils"
+	"git.jd.com/baas/monitor/prometheus/database"
+)
+
+func main() {
+
+	go job.StartTimer()
+
+	//释放database
+	defer database.Db.Close()
+
+	//初始化路由
+	router := router.InitRouter()
+
+	router.Run(":" + utils.GetServerPort())
+}
+
+========================================================================================================================
+###dbConnection.go数据库连接####
+
+package database
+
+import (
+	"fmt"
+	"git.jd.com/baas/monitor/prometheus/common/utils"
+	"github.com/astaxie/beego/logs"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+)
+
+var Db *gorm.DB
+
+/*
+数据库表结构模型
+*/
+type Bmonitor struct {
+	ID         uint      `gorm:"primary_key"`
+	Type       string    `gorm:"type:varchar(255);not null"`
+	Val        float64   `gorm:"type:double(10,4);not null"`
+	OriginData string    `gorm:"type:text;not null"`
+	CreateTime time.Time `gorm:"not null;DEFAULT CURRENT_TIMESTAMP"`
+}
+
+func init() {
+
+	var err error
+
+	Db, err = gorm.Open("mysql", "root:shiyufeng@tcp(127.0.0.1:3306)/monitor?charset=utf8&parseTime=True&loc=Local")
+
+	if err != nil {
+		panic(err)
+	}
+
+	logs.Info("###初始化数据库表结构###")
+
+	Db.SingularTable(true) //建表不再用复数(否则会在表后加s)
+
+	//初始化数据库表结构
+	if err = CreateTableSchema(Db); err != nil {
+		logs.Info("###创建数据库表结构错误###", err)
+		fmt.Println("err", err)
+		panic(err)
+	}
+}
+
+/*
+ 创建数据库表结构
+*/
+func CreateTableSchema(db *gorm.DB) error {
+
+	logs.Info("###创建Bmonitor数据库表结构###")
+	if true == db.HasTable(&Bmonitor{}) {
+		return nil
+	}
+	dbRes := db.CreateTable(&Bmonitor{})
+	return dbRes.Error
+}
+
+========================================================================================================================
+
+##业务写入数据###
+
+func InsertMetric(monitordata model.MonitorData) error{
+
+	tx := database.Db.Begin()
+
+	//获取原始请求的json数据
+	jsonData, err := json.Marshal(monitordata)
+
+	if err != nil {
+		logs.Error("将原结构体解析成json格式错误: %v", err)
+		fmt.Println("将原结构体解析成json格式错误", err)
+		return err
+	}
+
+	logs.Info("jsonData", string(jsonData))
+	fmt.Println("jsonData###", string(jsonData))
+
+	bmonitor:=&model.Bmonitor{
+		Type:monitordata.Data.ResultType,
+		Val:12.3456,
+		OriginData:string(jsonData),
+		CreateTime:time.Now(),
+	}
+
+	if err:=tx.Create(bmonitor).Error;err!=nil{
+		fmt.Println("###写入数据错误###",err)
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+========================================================================================================================

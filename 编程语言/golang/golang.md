@@ -33,6 +33,8 @@ gin框架获取post请求的所有参数
 
 ### 三.[gorm框架](http://gorm.book.jasperxu.com/advanced.html#sb)
 
+[示例](resources/gosrc/orm/gorm.txt)
+
 + 支持的数据库有：mysql、postgre、sqlite、sqlserver
 
 + 文档 [github](https://github.com/jinzhu/gorm) | [gorm](http://gorm.io/)
@@ -70,9 +72,9 @@ gin框架获取post请求的所有参数
 
 ## [cron定时任务](resources/gosrc/jobs/cron.txt)
 
-**业务需求：定时调用prometheus接口获取监控指标.**
+## [http-get请求](resources/gosrc/http/http-get.txt)
 
-**实现方案：1。独立启一个goroutine,与main并行执行 2。通过配置文件配置执行的方法与时间 3。go get github.com/robfig/cron**
+## [http-post请求](resources/gosrc/http/http-post.txt)
 
 -----------------------------------------
 
