@@ -31,7 +31,7 @@ gin框架获取post请求的所有参数
 
 ### 二.sqlx框架
 
-### 三.gorm框架
+### 三.[gorm框架](http://gorm.book.jasperxu.com/advanced.html#sb)
 
 + 支持的数据库有：mysql、postgre、sqlite、sqlserver
 

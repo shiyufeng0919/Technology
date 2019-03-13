@@ -241,10 +241,45 @@ Unix/Linux中主要两大类Shell:
   
  ![](resources/images/128.jpg)
   
+#### (3)source:读入环境设定档的指令
+
+**/etc/profile & ~/.bash_profile只有login shell才会读**
+
+![](resources/images/129.jpg)
+
+**~/.bashrc(non-login shell会读)**
+
+![](resources/images/130.jpg)
+
+#### (4)其他相关设定档
+
++ /etc/man_db.conf :规范了使用man时，man page路径到哪里寻找
+
++ ~/.bash_history :历史命令
+
++ ~/.bash_logout : 当登出bash后，系统再帮我做完什么动作后才离开
+
+### 4.终端机的环境设定: stty,set
 
 [鸟哥的linux私房菜](http://linux.vbird.org/linux_basic/0320bash.php)
 
+### 5.bash预设的组合键
 
+![](resources/images/131.jpg)
+
+### 6.万用字元与特殊符号
+
++ 万用字元
+
+![](resources/images/132.jpg)
+
+![](resources/images/133.jpg)
+
++ 特殊符号
+
+![](resources/images/134.jpg)
+
+## 五。资料流重导向
 
 
 
