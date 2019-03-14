@@ -281,7 +281,61 @@ Unix/Linux中主要两大类Shell:
 
 ## 五。资料流重导向
 
+**资料流重导向即将某个指令执行后应该要出现屏幕上的资料，给它传输到其他的地方**
 
++ standard output 标准输出(简称stdout)
+
++ standard error output 标准错误输出(简称stderr)
+
+    **传送所用的特殊字元**
+    
+    + 标准输入(stdin) ：代码为0 ，使用< 或<< 
+    + 标准输出(stdout)：代码为1 ，使用> 或>> 
+    + 标准错误输出(stderr)：代码为2 ，使用2> 或2>> 
+
+![](resources/images/135.jpg)
+
+![](resources/images/136.jpg)
+
++ /dev/null垃圾桶黑洞装置与特殊写法
+
+![](resources/images/137.jpg)
+
+![](resources/images/138.jpg)
+
++ standard input: < 与 << 
+
+![](resources/images/139.jpg)
+
+![](resources/images/140.jpg)
+
+![](resources/images/141.jpg)
+
+![](resources/images/142.jpg)
+
+## 六。命令执行的判断依据: ; && ||
+
++ 「分号(;)」:cmd;cmd(不考虑反映令相关性的连续指令下达)
+
++ 「$?(指令回传值)与&&或||」
+
+![](resources/images/143.jpg)
+
+![](resources/images/144.jpg)
+
+![](resources/images/145.jpg)
+
+![](resources/images/146.jpg)
+
+**注意下述指令区别**
+
+(1) $ ls /tmp/syf && echo "exist" || echo "not exist" #如syf目录存在，则输出exist，否则输出not exist(||前面执行成功后面不会执行)
+
+(2) $ ls /tmp/syf || echo "not exist" && echo "exist" #此种情况会同时出现exist和not exist情况.因为&&命令前边执行成功，后边即会执行
+
+cmd1 && cmd2 || cmd3 #cmd2与cmd3放置肯定可以执行成功的指令
+
+## 七。管线命令(pipe)
 
 -----------------------
 

@@ -15,7 +15,7 @@ shiyufeng:~ shiyufeng$ tar zcf etc_$(date +%F).tar.gz /etc  #将时间作为压�
 tar: Removing leading '/' from member names
 
 shiyufeng:~ shiyufeng$ ls -l etc_2019-02-23.tar.gz   #打包结果，包名中包含有当前日期
--rw-r--r--  1 shiyufeng  JDJR\Domain Users  434 Feb 23 15:06 etc_2019-02-23.tar.gz
+-rw-r--r--  1 shiyufeng   434 Feb 23 15:06 etc_2019-02-23.tar.gz
 
 shiyufeng:~ shiyufeng$ H=$(uname -n)  #获取主机名并赋值给H变量
 
@@ -26,4 +26,4 @@ shiyufeng:~ shiyufeng$ tar zcf $H.tar.gz /etc/services  #将主机名作为压�
 tar: Removing leading '/' from member names
 
 shiyufeng:~ shiyufeng$ ls -l shiyufeng.local.tar.gz    #打包结果，包名中包含有主机名
--rw-r--r--  1 shiyufeng  JDJR\Domain Users  186282 Feb 23 15:08 shiyufeng.local.tar.gz
+-rw-r--r--  1 shiyufeng  Users  186282 Feb 23 15:08 shiyufeng.local.tar.gz
