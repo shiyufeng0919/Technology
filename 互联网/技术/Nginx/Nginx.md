@@ -1,5 +1,17 @@
 # 正向代理 与 反向代理
 
+# Nginx安装
+
+### [mac安装Nginx](https://www.cnblogs.com/meng1314-shuai/p/8335140.html)
+
+    $ brew install nginx
+    
+    $ open /usr/local/etc/nginx/    #查看nginx安装目录(brew info nginx查看查nginx安装信息)
+    
+    $ open /usr/local/Cellar/nginx  #nginx被安装到的目录
+    
+    $ nginx  #启动nginx,浏览器访问:localhost:8080即可显示nginx信息
+
 # Nginx配置文件及内置变量
 
 **nginx.conf配置**

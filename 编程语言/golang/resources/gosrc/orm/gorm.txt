@@ -114,3 +114,35 @@ func InsertMetric(user model.User) error{
 }
 
 ========================================================================================================================
+
+### 业务查询数据(按时间排序，取前5条记录) : 「gorm中的order与limit用法」 ###
+
+func GetData(c *gin.Context){
+
+	logs.Info("获取数据")
+
+	users,err:=mapper.GetUsers()
+
+	if err !=nil{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, message.NewErrorResponse(500, err))
+		return
+	}
+
+	c.AbortWithStatusJSON(http.StatusOK, message.NewSuccessResponse(users))
+}
+
+func GetUsers()([]model.Users,error){
+
+	users:=make([]model.Users,0)
+
+	fmt.Println("获取数据##")
+
+	err:=database.Db.Order("create_time desc").Limit(5).Find(&users) //按时间排序获取前5条记录
+
+	if err !=nil {
+		logs.Info("查询数据库错误:",err)
+		return users,err.Error
+	}
+
+	return users,nil
+}
