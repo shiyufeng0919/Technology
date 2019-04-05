@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: images-ingress
+  namespace: images-syf
+spec:
+  rules:
+    - host: images.syf.local #此域名需解析到k8s集群负载主机IP
+      http:
+        paths:
+          - backend:
+              serviceName: images-service
+              servicePort: 80
+            path: /

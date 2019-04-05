@@ -13,7 +13,7 @@ server:
 
 #===== 日志相关配置开始 =================
 log:
-  filename: "baas-monitor" #文件名
+  filename: "monitor" #文件名
   perm: "0660" #日志文件权限
   maxsize: 268435456
   level: 7 #日志显示级别

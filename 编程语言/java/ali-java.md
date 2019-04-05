@@ -1,0 +1,1 @@
+#### [阿里巴巴禁止在 foreach 循环里进行元素的 remove/add 操作](https://mp.weixin.qq.com/s/xf8PQcAYI9sam6JRE-_vaQ)

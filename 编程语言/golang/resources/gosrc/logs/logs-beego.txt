@@ -24,7 +24,7 @@ func GetLoggerConfig() string {
 
 	filename := viper.GetString("log.filename")
 	if filename == "" {
-		filename = "baas-monitor"
+		filename = "monitor"
 	}
 
 	perm := viper.GetString("log.perm")

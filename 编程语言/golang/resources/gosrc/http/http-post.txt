@@ -59,3 +59,83 @@ func callJava(javaParam EnrollCfca) ResultCfca {
 	return resultcfca
 }
 =======================================================================================
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+「项目应用」:参照(https://www.cnblogs.com/hitfire/articles/6427033.html)
+
+其中x509错误可参照(https://studygolang.com/articles/12217)
+
+func Getnamespace(ctx *gin.Context){
+
+	logs.Info("调用获取命名空间接口start####")
+
+	//获取参数network
+	netname:=ctx.DefaultQuery("network","")
+
+	logs.Info("请求参数network=",netname)
+
+	//获取请求地址
+	var url,method string
+
+	logs.Info("读取配置文件请求地址###","url:",viper.GetString("http.rtmc"),",method:",viper.GetString("rtmc.getNetworkNamespaces"))
+
+	url=viper.GetString("http.rtmc")
+
+	if url == ""{
+		url="http://xx.xx.com"
+	}
+
+	method=viper.GetString("rtmc.getNetworkNamespaces")
+
+	if method == "" {
+		method="/v1/monitor/getNetworkNamespaces"
+	}
+
+	rtmcUrl:=url+method
+
+	logs.Info("rtmc请求URL###",rtmcUrl)
+
+	//调用传参数获取数据
+
+	var param map[string] interface{}
+
+	param=make(map[string]interface{})
+
+	param["network"]=netname
+
+	jsonParam,err:=json.Marshal(param)
+
+	if err !=nil {
+		logs.Error("json格式化数据错误",err)
+	}
+
+	logs.Info("传递请求参数###",string(jsonParam))
+
+	tr := &http.Transport{
+		TLSClientConfig:&tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}  //处理报x509证书错误
+
+	req, err := http.NewRequest("POST", rtmcUrl, bytes.NewReader(jsonParam))
+
+	if err != nil {
+		logs.Error("向rtmc发送http连接发生错误###",err)
+	}
+	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		logs.Info("发送请求失败###",err)
+	}
+
+	//响应
+	response, err := ioutil.ReadAll(resp.Body)
+
+	logs.Info("返回结果###",string(response))
+
+	logs.Info("调用获取命名空间接口end####")
+
+	defer resp.Body.Close()
+}

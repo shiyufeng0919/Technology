@@ -1,0 +1,20 @@
+root@node1:/home/k8s/kubernetes/cluster# kubectl config view
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: http://192.168.56.101:8080
+  name: ubuntu
+contexts:
+- context:
+    cluster: ubuntu
+    user: ubuntu
+  name: ubuntu
+current-context: ubuntu
+kind: Config
+preferences: {}
+users:
+- name: ubuntu
+  user:
+    password: D3wgncMpKQip8wFv
+    username: admin

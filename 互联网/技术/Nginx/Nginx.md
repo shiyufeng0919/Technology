@@ -16,11 +16,11 @@
 
 **nginx.conf配置**
 
-![](../../resources/nginx/1.jpg)
+![](resources/images/1.jpg)
 
 **内置变量**
 
-![](../../resources/nginx/3.jpg)
+![](resources/images/3.jpg)
 
 # Nginx应用
 
@@ -36,11 +36,11 @@
 
 **若两个页面的协议，端口（如果有指定）和域名都相同，则两个页面具有相同的源**
 
-![](../../resources/nginx/2.jpg)
+![](resources/images/2.jpg)
 
 #### 3.nginx解决跨域的原理
 
-![](../../resources/nginx/4.jpg)
+![](resources/images/4.jpg)
 
 ### 请求过滤
 

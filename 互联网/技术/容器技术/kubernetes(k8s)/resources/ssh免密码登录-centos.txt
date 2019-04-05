@@ -1,0 +1,43 @@
+### ssh登录及免密码
+
+**场景：三台虚拟机peer1(Master节点),peer2,peer3**
+
+**实现：peer1&peer2&peer3可通过ssh相互登录，且peer1可免密码登录peer2,peer3**
+
+Step1:$ vagrant ssh peer1 #先登录peer1
+
+Step2:$ sudo su #切换root用户
+
+Step3:$ passwd #先修改一下密码
+
+Step4:$ vim /etc/hosts  #可设置一下主机名 eg:192.168.1.101 peer1
+
+Step5:$ vim /etc/ssh/sshd_config #设置如下信息
+
+    PermitRootLogin yes
+    PermitEmptyPasswords no
+    PasswordAuthentication yes
+
+Step6:$ ssh-keygen #密钥
+
+    authorized_keys:存放远程免密登录的公钥,主要通过这个文件记录多台机器的公钥
+    id_rsa : 生成的私钥文件
+    id_rsa.pub ： 生成的公钥文件
+    know_hosts : 已知的主机公钥清单
+
+Step7: 设置.ssh目录及authorized_keys文件权限
+
+    $ cd /root/.ssh/
+    $ ls -la authorized_keys #查看权限
+    $ chmod 600 authorized_keys  #设置文件权限
+    $ chmod 700 ../.ssh #设置目录权限
+
+Step8: $ systemctl restart sshd #重启ssh
+
+Step9: $ vagrant ssh peer2/peer3 #分别登录peer2 & peer3执行step2-step8操作
+
+Step10: $ vagrant ssh peer1 #切换到peer1
+
+Step11: $ ssh-copy-id -i root@peer2(或peer3) #将peer1公钥添加到peer2(或peer3)的authorized_keys文件
+
+Step12: $ ssh peer2/peer3 #即可直接登录(免密码)

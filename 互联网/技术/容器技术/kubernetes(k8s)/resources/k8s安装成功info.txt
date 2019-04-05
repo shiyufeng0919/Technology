@@ -1,0 +1,137 @@
+root@node1:/home/k8s/kubernetes/cluster# KUBERNETES_PROVIDER=ubuntu ./kube-up.sh
+... Starting cluster using provider: ubuntu
+... calling verify-prereqs
+Identity added: /root/.ssh/id_rsa (/root/.ssh/id_rsa)
+... calling kube-up
+/home/k8s/kubernetes/cluster/ubuntu /home/k8s/kubernetes/cluster
+Prepare flannel 0.5.5 release ...
+Prepare etcd 2.3.1 release ...
+Prepare kubernetes 1.13.4 release ...
+Done! All your binaries locate in kubernetes/cluster/ubuntu/binaries directory
+/home/k8s/kubernetes/cluster
+
+Deploying master and node on machine 192.168.56.101
+root@192.168.56.101's password:
+root@192.168.56.101's password:
+make-ca-cert.sh                                                                                                      100% 4136     4.0KB/s   00:00
+easy-rsa.tar.gz                                                                                                      100%   42KB  42.4KB/s   00:00
+config-default.sh                                                                                                    100% 5595     5.5KB/s   00:00
+util.sh                                                                                                              100%   29KB  28.9KB/s   00:00
+kubelet.conf                                                                                                         100%  645     0.6KB/s   00:00
+kube-proxy.conf                                                                                                      100%  688     0.7KB/s   00:00
+kubelet                                                                                                              100% 2158     2.1KB/s   00:00
+kube-proxy                                                                                                           100% 2233     2.2KB/s   00:00
+kube-controller-manager.conf                                                                                         100%  761     0.7KB/s   00:00
+kube-apiserver.conf                                                                                                  100%  682     0.7KB/s   00:00
+kube-scheduler.conf                                                                                                  100%  682     0.7KB/s   00:00
+etcd.conf                                                                                                            100%  707     0.7KB/s   00:00
+kube-scheduler                                                                                                       100% 2360     2.3KB/s   00:00
+kube-controller-manager                                                                                              100% 2672     2.6KB/s   00:00
+etcd                                                                                                                 100% 2073     2.0KB/s   00:00
+kube-apiserver                                                                                                       100% 2358     2.3KB/s   00:00
+reconfDocker.sh                                                                                                      100% 2082     2.0KB/s   00:00
+kube-scheduler                                                                                                       100%   77MB  77.0MB/s   00:01
+flanneld                                                                                                             100%   16MB  15.8MB/s   00:00
+kube-controller-manager                                                                                              100%  135MB 134.5MB/s   00:01
+etcd                                                                                                                 100%   16MB  15.9MB/s   00:00
+etcdctl                                                                                                              100%   14MB  13.7MB/s   00:00
+kube-apiserver                                                                                                       100%  144MB  72.1MB/s   00:02
+flanneld                                                                                                             100%   16MB  15.8MB/s   00:00
+kubelet                                                                                                              100%  123MB 122.8MB/s   00:01
+kube-proxy                                                                                                           100%   69MB  69.5MB/s   00:01
+root@192.168.56.101's password:
+flanneld.conf                                                                                                        100%  579     0.6KB/s   00:00
+flanneld                                                                                                             100% 2121     2.1KB/s   00:00
+flanneld.conf                                                                                                        100%  570     0.6KB/s   00:00
+flanneld                                                                                                             100% 2131     2.1KB/s   00:00
+root@192.168.56.101's password:
+etcd start/running, process 7573
+etcd cluster has no published client endpoints.
+Try '--no-sync' if you want to access non-published client endpoints(http://127.0.0.1:2379,http://127.0.0.1:4001).
+Error:  client: no endpoints available
+etcd cluster has no published client endpoints.
+Try '--no-sync' if you want to access non-published client endpoints(http://127.0.0.1:2379,http://127.0.0.1:4001).
+Error:  client: no endpoints available
+Error:  100: Key not found (/coreos.com) [19]
+{"Network":"172.16.0.0/16", "Backend": {"Type": "vxlan"}}
+{"Network":"172.16.0.0/16", "Backend": {"Type": "vxlan"}}
+docker stop/waiting
+docker start/running, process 7856
+Connection to 192.168.56.101 closed.
+
+Deploying node on machine 192.168.56.102
+config-default.sh                                                                                                    100% 5595     5.5KB/s   00:00
+util.sh                                                                                                              100%   29KB  28.9KB/s   00:00
+reconfDocker.sh                                                                                                      100% 2082     2.0KB/s   00:00
+kubelet.conf                                                                                                         100%  645     0.6KB/s   00:00
+kube-proxy.conf                                                                                                      100%  688     0.7KB/s   00:00
+kubelet                                                                                                              100% 2158     2.1KB/s   00:00
+kube-proxy                                                                                                           100% 2233     2.2KB/s   00:00
+flanneld                                                                                                             100%   16MB  15.8MB/s   00:00
+kubelet                                                                                                              100%  123MB  61.4MB/s   00:02
+kube-proxy                                                                                                           100%   69MB  69.5MB/s   00:01
+flanneld.conf                                                                                                        100%  579     0.6KB/s   00:00
+flanneld                                                                                                             100% 2121     2.1KB/s   00:00
+flanneld start/running, process 7465
+docker stop/waiting
+docker start/running, process 7693
+Connection to 192.168.56.102 closed.
+
+Deploying node on machine 192.168.56.103
+config-default.sh                                                                                                    100% 5595     5.5KB/s   00:00
+util.sh                                                                                                              100%   29KB  28.9KB/s   00:00
+reconfDocker.sh                                                                                                      100% 2082     2.0KB/s   00:00
+kubelet.conf                                                                                                         100%  645     0.6KB/s   00:00
+kube-proxy.conf                                                                                                      100%  688     0.7KB/s   00:00
+kubelet                                                                                                              100% 2158     2.1KB/s   00:00
+kube-proxy                                                                                                           100% 2233     2.2KB/s   00:00
+flanneld                                                                                                             100%   16MB  15.8MB/s   00:00
+kubelet                                                                                                              100%  123MB  61.4MB/s   00:02
+kube-proxy                                                                                                           100%   69MB  69.5MB/s   00:00
+flanneld.conf                                                                                                        100%  579     0.6KB/s   00:00
+flanneld                                                                                                             100% 2121     2.1KB/s   00:00
+flanneld start/running, process 7396
+docker stop/waiting
+docker start/running, process 7623
+Connection to 192.168.56.103 closed.
+Validating masterroot@192.168.56.101's password:
+root@192.168.56.101's password:
+root@192.168.56.101's password:
+
+Validating root@192.168.56.101root@192.168.56.101's password:
+root@192.168.56.101's password:
+root@192.168.56.101's password:
+
+Validating root@192.168.56.102
+Validating root@192.168.56.103syf
+Using master 192.168.56.101
+cluster "ubuntu" set.
+user "ubuntu" set.
+context "ubuntu" set.
+
+switched to context "ubuntu".
+Wrote config for ubuntu to /root/.kube/config
+... calling validate-cluster
+Found 3 node(s).
+NAME             STATUS    AGE
+192.168.56.101   Ready     53s
+192.168.56.102   Ready     40s
+192.168.56.103   Ready     32s
+Validate output:
+NAME                 STATUS    MESSAGE              ERROR
+scheduler            Healthy   ok
+controller-manager   Healthy   ok
+etcd-0               Healthy   {"health": "true"}
+Cluster validation succeeded
+Done, listing cluster services:
+
+Kubernetes master is running at http://192.168.56.101:8080
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+root@node1:/home/k8s/kubernetes/cluster# kubectl get nodes
+NAME             STATUS    AGE
+192.168.56.101   Ready     5m
+192.168.56.102   Ready     5m
+192.168.56.103   Ready     5m
+root@node1:/home/k8s/kubernetes/cluster#

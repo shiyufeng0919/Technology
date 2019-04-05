@@ -1,0 +1,21 @@
+[root@k8s2 ~]# kubeadm join 192.168.2.11:6443 --token u89wdl.5myljtrmiw43teto --discovery-token-ca-cert-hash sha256:dcfde230665793917305984bd359305cff410000eb19ff409acf3d16925f6b72
+[preflight] Running pre-flight checks
+[discovery] Trying to connect to API Server "192.168.2.11:6443"
+[discovery] Created cluster-info discovery client, requesting info from "https://192.168.2.11:6443"
+[discovery] Requesting info from "https://192.168.2.11:6443" again to validate TLS against the pinned public key
+[discovery] Cluster info signature and contents are valid and TLS certificate validates against pinned roots, will use API Server "192.168.2.11:6443"
+[discovery] Successfully established connection with API Server "192.168.2.11:6443"
+[join] Reading configuration from the cluster...
+[join] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[kubelet] Downloading configuration for the kubelet from the "kubelet-config-1.13" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Activating the kubelet service
+[tlsbootstrap] Waiting for the kubelet to perform the TLS Bootstrap...
+[patchnode] Uploading the CRI Socket information "/var/run/dockershim.sock" to the Node API object "k8s2.node" as an annotation
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the master to see this node join the cluster.

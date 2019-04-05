@@ -76,6 +76,8 @@ gin框架获取post请求的所有参数
 
 ### [http-post请求](resources/gosrc/http/http-post.txt)
 
+### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
+
 -----------------------------------------
 
 # golang实用工具
