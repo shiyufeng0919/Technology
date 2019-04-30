@@ -78,6 +78,8 @@ gin框架获取post请求的所有参数
 
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
 
+### [Centrifugo(实时消息服务器)]()
+
 -----------------------------------------
 
 # golang实用工具

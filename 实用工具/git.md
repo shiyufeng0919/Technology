@@ -71,3 +71,7 @@ $ tmux #进入tmux模式  $ exit #退出tmux模式
 + 创建远程版本(本地版本push到远程)：$ git push origin [remote-tag-name]
 
 + 删除远程版本：$ git push origin :refs/tags/[remote-tag-name]
+
+## 版本回退
+
++ 回退版本：$ git reset --hard

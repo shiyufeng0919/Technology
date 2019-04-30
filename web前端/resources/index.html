@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>userinfo collection</title>
+
+    <!--引入js埋点-->
+    <script type="text/javascript">
+        //_maq是全局数组用于放置各种配置,格式：_maq.push([‘Action’, ‘param1’, ‘param2’, …])
+        var _maq = _maq || [];
+        _maq.push(['page','action1']);
+        _maq.push(['time', '2019-4-11 14:00:00']);
+        _maq.push(['event','onclick']);
+        _maq.push(['user','syf']);
+
+        //匿名函数-重点(自调用匿名函数只会在运行时执行一次，一般用于初始化)
+        (function() {
+            //引入外部js文件,创建一个script,并根据协议(http或https)将src指向对应的ma.js,最后将这个元素插入页面的dom树上
+            var ma = document.createElement('script');
+            ma.type = 'text/javascript';
+            ma.async = true; //异步调用外部 js 文件，即不阻塞浏览器的解 析，待外部 js 下载完成后异步执行。这个属性是 HTML5 新引入的。
+            ma.src = 'http://127.0.0.1:9999/maidian.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ma, s);
+        })();
+    </script>
+</head>
+<body>
+<h1 align="center">user action info collection</h1>
+</body>
+</html>
