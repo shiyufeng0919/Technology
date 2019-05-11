@@ -1,4 +1,8 @@
-# 消息队列--Kafka
+# Apache Kafka -- 分布式流处理平台
+
+[kafka中文文档](http://kafka.apachecn.org/documentation.html#producerapi)
+
+# Apache Kafka -- 掘金好文
 
 ### 一。 [消息中间件如何实现每秒几十万的高并发写入](https://mp.weixin.qq.com/s?__biz=MzU0OTk3ODQ3Ng==&mid=2247484700&idx=1&sn=fbfdb57ea53882828e4e3bd0b3b61947&chksm=fba6ed1fccd16409c43baa7f941e522d97a72e63e4139f663b327c606c6bb5dfe516b6f61424&scene=21#wechat_redirect)
 

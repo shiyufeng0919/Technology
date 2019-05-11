@@ -11,3 +11,7 @@
 docker rmi `docker images -q | awk '/^<none>/ { print $3 }'`
 //按关键字删除
 docker rmi --force `docker images | grep doss-api | awk '{print $3}'`    //其中doss-api为关键字
+
+### 重命名
+
+#### docker rename old-containername new-containername

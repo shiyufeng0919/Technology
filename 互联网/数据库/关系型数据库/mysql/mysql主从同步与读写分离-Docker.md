@@ -66,7 +66,7 @@
     
     
     #查看镜像
-    $ docker images
+    $ docker images 或 docker image ls | grep mysql
     REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
     slave/mysql         latest              9f49a5963025        44 minutes ago      372 MB
     master/mysql        latest              ee724f107a4e        51 minutes ago      372 MB
@@ -98,7 +98,7 @@
     
     或
     
-    mysql>GRANT REPLICATION SLAVE ON *.* to 'root'@'%' identified by 'syf';  #（所有ip）
+    mysql>GRANT REPLICATION SLAVE ON *.* to 'root'@'%' identified by 'syf';  #（所有ip）(密码为主库密码)
     
     #查看主容器数据库状态
     mysql> show master status;
@@ -329,3 +329,11 @@
     $ rpm -e mysql-community-common-5.6.43-2.el7.x86_64
     
 ### 2.
+
+
+---------------------
+docker run -p 3306 --name mysql-master -v /Users/shiyufeng/learn/mysql/master/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=master -d master/mysql
+
+ docker run -p 3306 --name mysql-slave -v /Users/shiyufeng/learn/mysql/slave/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=slave -d slave/mysql
+ 
+ 参考http://www.cnblogs.com/aegisada/p/5699058.html

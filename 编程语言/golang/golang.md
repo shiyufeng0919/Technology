@@ -1,3 +1,7 @@
+### [GO语言标准库文档中文版](https://studygolang.com/pkgdoc)
+
+-----------------------------------------
+
 # [框架gin vs beego](https://www.imooc.com/video/18638)
 
 go框架|支持MVC|支持正则路由|支持session|性能
@@ -79,6 +83,11 @@ gin框架获取post请求的所有参数
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
 
 ### [Centrifugo(实时消息服务器)]()
+
+## golang+redis
+
+1.[博文:Go实战--golang中使用redis(redigo和go-redis/redis)](https://blog.csdn.net/wangshubo1989/article/details/75050024)
+2.[redigo官方文档](https://godoc.org/github.com/garyburd/redigo/redis)
 
 -----------------------------------------
 

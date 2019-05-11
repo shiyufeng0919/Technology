@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet  #指定kind为DaemonSet
+metadata:
+  name: node-exporter-daemonset
+spec:
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      hostNetwork: true #直接使用Host的网络
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter
+          imagePullPolicy: IfNotPresent
+          command: #设置容器启动命令
+            - /bin/node_exporter
+            - --path.procfs
+            - /host/proc
+            - --path.sysfs
+            - /host/sys
+            - --collector.filesystem.ignored-mount-points
+            - ^/(sys|proc|dev|host|etc)($|/)
+          volumeMounts: #通过Volume将Host路径/proc,/sys,/映射到容器中
+            - name: proc
+              mountPath: /host/proc
+            - name: sys
+              mountPath: /host/sys
+            - name: root
+              mountPath: /rootfs
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: root
+          hostPath:
+            path: /
