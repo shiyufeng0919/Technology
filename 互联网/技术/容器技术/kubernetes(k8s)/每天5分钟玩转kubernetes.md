@@ -2124,6 +2124,382 @@ kubectl get pod -o wide会查询多个失败Pod?
 
 ### 第9章 数据管理
 
+>本章主要讨论k8s如何管理存储资源
+
+>学习目标
+
+    A.Volume：k8s如何通过volume为集群中的容器提供存储
+    
+    B.实践常用volume类型及应用场景
+    
+    C.k8s如何通过Persistent Volume和Persistent Volume Claim分离集群管理员与集群用户职责
+    
+    D.实践Volume的静态供给和动态供给
+    
+#### 1.Volume--k8s存储模型
+
+>目标：如何将各种持久化存储映射到容器
+
+>问题
+
+    容器和pod是短暂(生命周期短)的，会被频繁创建和销毁。容器销毁时，保存在容器内部文件系统中的数据都会被清除。
+    
+>上述为持久化存储容器的数据，可使用k8s volume
+
+    Volume的生命周期独立于容器，Pod中的容器可能被销毁和重建，但Volume会被保留。
+    
+>本质上k8s Volume是一个目录，同Docker Volume
+
+    Volume被mount到Pod,Pod中所有容器都可以访问这个Volume
+    
+>k8s Volume支持多种backend类型,完整列表参看[官方文档](https://kubernetes.io/docs/concepts/storage/volumes/)
+
+    emptyDir,hostPath,GCE Persistent Disk,AWS Elastic Block Store,NFS,Ceph等
+    
+>Volume提供了对各种backend抽象
+
+    容器在使用Volume读写数据时，不需关心数据存放在本地节点/云硬盘，对容器来说，所有类型Volume都只是一个目录
+    
+##### 1-1.emptyDir --最基础的Volume类型
+
+>emptyDir Volume对容器来说是持久的，对于Pod则不是
+
+    当Pod从节点删除，则Volume的内容也会被删除
+    
+    emptyDir Volume的生命周期与Pod一致
+    
+    emptyDir适合Pod中的容器需要临时共享存储空间的场景。如生产者，消费者用例
+    
+>实战
+
+    ###Step1
+    [root@node1 k8s]# cat emptyDir.yml 
+    apiVersion: v1
+    kind: Pod   ##创建pod资源
+    metadata:
+      name: producer-consumer
+    spec:
+      containers:
+      - image: busybox
+        name: producer
+        volumeMounts:
+        - mountPath: /producer_dir  ##2.producer容器将shared-volume mount到/producer_dir目录
+          name: shared-volume
+        args:
+        - /bin/sh   ##3.通过echo将数据写入到文件hello里
+        - -c
+        - echo "hello k8s volume" > /producer_dir/hello; sleep 30000
+      - image: busybox
+        name: consumer
+        volumeMounts:
+        - mountPath: /consumer_dir ##4.consumer容器将shared-volume mount到/consumer_dir目录
+          name: shared-volume
+        args:
+        - /bin/sh  ##5.通过cat从文件hello读数据
+        - -c
+        - cat /consumer_dir/hello; sleep 30000
+      volumes:   
+      - name: shared-volume
+        emptyDir: {}   ##1.定义一个emptyDir类型的Volume shared-volume
+
+    ###Step2.
+    [root@node1 k8s]# kubectl apply -f emptyDir.yml 
+    pod/producer-consumer created
+    
+    ###Step3.
+    [root@node1 k8s]# kubectl get pod
+    NAME                READY   STATUS    RESTARTS   AGE
+    producer-consumer   2/2     Running   0          23m
+    
+    ###Step4.通过logs查看，显示consumer成功读到producer写入的数据,验证两个容器共享emptyDir Volume
+    [root@node1 k8s]# kubectl logs producer-consumer consumer
+    hello k8s volume
+    
+    
+    说明：emptyDir是Docker Host文件系统里的目录。效果相当于执行：
+    (1).docker run -v /producer_dir
+    (2).docker run -v /consumer_dir
+    
+    
+    ###进入pod，查看容器
+    [root@node1 k8s]# kubectl --namespace=default exec -it producer-consumer --container producer -- sh
+    / # ls
+    bin           etc           proc          root          tmp           var
+    dev           home          producer_dir  sys           usr
+    
+    [root@node1 k8s]# kubectl --namespace=default exec -it producer-consumer --container consumer -- sh
+    / # ls
+    bin           dev           home          root          tmp           var
+    consumer_dir  etc           proc          sys           usr
+    / # exit
+    
+##### 1-2. hostPath--持久性优于emptyDir
+
+>hostPath作用：将Docker Host文件系统中已经存在的目录mount给pod容器。
+
+    大部分应用不会使用hsotPath Volume,因为实际增加了Pod与节点的耦,限制了pod的使用
+    
+    需要访问k8s或docker内部数据(配置文件或二进制库)等应用则需要使用Hostpath
+    
+    如kube-apiserver和kube-controller-manager应用，查看kube-apiserver pod的配置:
+    (1).$ kubectl get pod --namespace=kube-system
+    (2).$kubectl edit --namespace=kube-system pod kube-apiserver-node1  ###查看kube-apiserver pod的配置
+    ###截取部分
+        volumeMounts: 
+        - mountPath: /etc/ssl/certs  #对应host目录
+          name: ca-certs   ##hostpath
+          readOnly: true
+        - mountPath: /etc/pki
+          name: etc-pki
+          readOnly: true
+        - mountPath: /etc/kubernetes/pki
+          name: k8s-certs
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      hostNetwork: true
+      nodeName: node1
+      priority: 2000000000
+      priorityClassName: system-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoExecute
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /etc/ssl/certs
+          type: DirectoryOrCreate
+        name: ca-certs
+      - hostPath:
+          path: /etc/pki
+          type: DirectoryOrCreate
+        name: etc-pki
+      - hostPath:
+          path: /etc/kubernetes/pki
+          type: DirectoryOrCreate
+        name: k8s-certs
+        
+>Pod销毁，hostPath对应的目录还会被保留，hostPath持久性优于emptyDir，但Host崩溃，则hostPath也就无法访问
+
+##### 1-3. 外部storage provider --真正持久性Volume
+
+    k8s若部署在AWS,GCE,AZURE等公有云上，则可直接使用云硬盘作为Volume
+    
+>实践:AWS Elastic Block Store
+
+    ###Step1.
+    [root@node1 k8s]# cat aws.yml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: using-ebs
+    spec:
+      containers:
+      - image: busybox
+        name: using-ebs
+        volumeMounts:
+        - mountPath: /test-ebs
+          name: ebs-volume
+      volumes:
+      - name: ebs-volume
+      #this AWS EBS volume must already exist
+        awsElasticBlockStore:
+          volumeID: <volume-id>
+          fsType: ext4
+          
+    说明：要在pod中使用ESB Volume，必须先在AWS中创建，然后通过volume-id引用
+    
+> k8s volume也可使用注流分布式存储，如Ceph,GlusterFS等
+
+    ###Ceph例子
+    [root@node1 k8s]# cat ceph.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: using-ceph
+    spec:
+      containers:
+        - image: busybox
+          name: using-ceph
+          volumeMounts:
+          - name: ceph-volume
+            mountPath: /test-ceph
+      volumes:
+        - name: ceph-volume
+          cephfs:
+            path: /some/path/in/side/cephfs  ##1.ceph文件系统的该目录被mount到容器路径/test-ceph
+            monitors: "10.16.154.78:6789"
+            secretFile: "/etc/ceph/admin.secret"
+    
+    说明：
+    
+    相对于emptyDir和hostPath，这些Volume最大特点不依赖k8s
+    
+    Volume的底层基础设施由独立的存储系统管理，与k8s集群是分离的。
+    
+    数据被持久化后，即使整个k8s崩溃也不会受损
+    
+#### 2.PersistentVolume(PV) & PersistentVolumeClaim(PVC)
+
+>Volume提供了好的数据持久化方案，但管理性上还有不足
+    
+    如前AWS EBS例：要使用Volume,Pod必须先知道
+    A.当前Volume来自AWS EBS
+    B.EBS Volume已提前创建且知道确切volume-id
+    
+    pod通常由应用开发人员维护，Volume则由存储系统管理员维护。（产生问题-耦合）(解决方案-k8s PV和PVC )
+    
+ 
+>PersistentVolume(PV):是外部存储系统中的一块存储空间(由管理员创建/维护)
+ 
+    与Volume一样，PV具有持久性，生命周期独立于Pod.
+    
+>PersistentVolumeClaim(PVC):是对PV的申请(Claim)(通常由普通用户创建和维护)
+ 
+    需要为Pod分配存储资源时，用户可创建一个PVC,指明存储资源的容量大小和访问模式(如只读)等信息。k8s会查找并提供满足条件的PV
+    
+>说明
+
+    有了PVC,用户只需告诉k8s需要什么样的存储资源，而不必关心真正的空间从哪分配，如何访问等底层细节信息。
+    
+    这些storage provider底层信息交由管理员处理
+    
+>k8s支持多类型的PersistentVolume(PV),[参见官方文档](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+
+    AWS EBS,Ceph,NFS
+    
+##### 2-1.NFS PersistentVolume
+
+>Step1.node1(master)节点搭建NFS服务器
+
+    ##1.
+    $ yum install -y nfs-utils rpcbind
+    
+    $ systemctl  start rpcbind
+    
+    [root@node1 k8s]# systemctl status rpcbind
+    ● rpcbind.service - RPC bind service
+       Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; enabled; vendor preset: enabled)
+       Active: active (running) since Sat 2019-05-11 02:38:29 UTC; 8h ago
+     Main PID: 2223 (rpcbind)
+       CGroup: /system.slice/rpcbind.service
+               └─2223 /sbin/rpcbind -w
+    
+    May 11 02:38:29 node1 systemd[1]: Starting RPC bind service...
+    May 11 02:38:29 node1 systemd[1]: Started RPC bind service.
+    
+    ##2.校验
+    [root@node1 k8s]# showmount -e
+    clnt_create: RPC: Program not registered
+    
+    ###解决方案
+    [root@node1 k8s]# service nfs restart 
+    Redirecting to /bin/systemctl restart nfs.service
+    
+    ##检验成功
+    [root@node1 k8s]# showmount -e 192.168.1.31
+    Export list for 192.168.1.31:
+    [root@node1 k8s]# showmount -e
+    Export list for node1:
+    
+>Step2.创建一个PV mypv1,配置文件nfs-pv1.yml(准备PV资源)
+
+    ###1.
+    [root@node1 k8s]# cat nfs-pv1.yml 
+    apiVersion: v1
+    kind: PersistentVolume  ##资源类型为持久化存储
+    metadata:
+      name: mypv1
+    spec:
+      capacity: ##1.指定PV的容器为1GB
+        storage: 1Gi
+      accessModes: ##2.指定访问模式为ReadWriteOnce(支持三种访问模式:ReadWriteOnce/ReadOnlyMany/ReadWriteMany)
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Recycle  ##3.指定当PV的回收策略为Recycle,支持三种回收策略(Recycle/Retain/Delete)
+      storageClassName: nfs  ##4.指定PV的class为nfs。相当于为PV设置了一个分类，PVC可以指定class申请相应的class的PV
+      nfs:
+        path: /nfsdata/pv1  ##5.指定PV在NFS服务器上对应的目录
+        server: 192.168.1.31
+        
+    ###2.创建mypv1
+    [root@node1 k8s]# kubectl apply -f nfs-pv1.yml 
+    persistentvolume/mypv1 created
+    
+    ###3.查看pv
+    [root@node1 k8s]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+    mypv1   1Gi        RWO            Recycle          Available           nfs                     8s
+
+    上述：status为Available表mypv1已就绪，可以被PVC申请
+    
+    accessModes三种访问模式：
+    (1).ReadWriteOnce:表示PV能以read-write模式mount到单个节点
+    (2).ReadOnlyMany:表示PV能以read-only模式mount到多个节点
+    (3).ReadWriteMany:表示PV能以read-write模式mount到多个节点
+    
+    persistentVolumeReclaimPolicy三种策略
+    (1).Retain:表需要管理员手工回收
+    (2).Recycle:表清除PV中的数据,效果相当于rm -rf /thevolume/*
+    (3).Delete:表删除Storage Provider上的对应存储资源。如AWS EBS,GCE PD,Azure Disk,OpenStack Cinder Volume等
+    
+>Step3.创建 PVC mypvc1,配置文件nfs-pvc1.yml(申请PV资源)
+
+    ###1.
+    [root@node1 k8s]# cat nfs-pvc1.yml 
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: mypvc1
+    spec:
+      accessModes:  ##指定访问模式
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi ##指定PV的容量
+      storageClassName: nfs ##指定PV的class为nfs
+
+    ###2.创建mypvc1
+    [root@node1 k8s]# kubectl apply -f nfs-pvc1.yml 
+    persistentvolumeclaim/mypvc1 created
+    
+    ###3.查询pvc,发现mypvc1已经绑定到mypv1，申请成功
+    [root@node1 k8s]# kubectl get pvc
+    NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    mypvc1   Bound    mypv1    1Gi        RWO            nfs            5s
+    
+    ###4.查看pv,此时CLAIM有值
+    [root@node1 k8s]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM            STORAGECLASS   REASON   AGE
+    mypv1   1Gi        RWO            Recycle          Bound    default/mypvc1   nfs                     40m
+
+>Step4.Pod中使用存储
+
+    ###1.
+    [root@node1 k8s]# cat pod1.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: mypod1
+    spec:
+      containers:
+        - name: mypod1
+          image: busybox
+          args:
+          - /bin/sh
+          - -c
+          - sleep 30000
+          volumeMounts:
+          - mountPath: "/mydata"
+            name: mydata
+      volumes:
+        - name: mydata
+          persistentVolumeClaim:
+            claimName: mypvc1
+            
+    ###2.
 
 -------------------------------------------------
     
