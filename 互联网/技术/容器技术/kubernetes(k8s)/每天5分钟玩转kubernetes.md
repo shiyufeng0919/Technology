@@ -1,4 +1,6 @@
-2019.5.11 开心玉凤==>目标：
+2019.5.11 开心玉凤
+
+目标：
 
     1。kubernetes重要概念和架构
     
@@ -7,6 +9,40 @@
 教程[完成创建kubernetes集群，部署应用，访问应用，扩展应用，更新应用等](https://kubernetes.io/docs/tutorials/#basics)
 
 博客[每天5分钟玩转k8s](https://mp.sohu.com/profile?xpt=Y2xvdWRtYW42QHNvaHUuY29t&_f=index_pagemp_2&spm=smpc.content.author.3.1557473409950ErIE9g3)
+
+文章[每天5分钟玩转k8s](https://www.cnblogs.com/liufei1983/category/1369899.html)
+
+
+-------------------------------------------------
+*************************************************
+
+
+目录：
+
+第1章 先把kubernetes跑起来
+
+第2章 重要概念
+
+第3章 部署k8s集群-kubeadm
+
+第4章 k8s架构
+
+第5章 运行应用
+
+第6章 通过service访问pod
+
+第7章 Rolling Update
+
+第8章 Health Check
+
+第9章 数据管理(一个数据库例子)
+
+第10章 Secret(处理敏感信息) & Configmap
+
+第11章 Helm-kubernetes的包管理器
+
+-------------------------------------------------
+*************************************************
 
 ### 第1章 先把kubernetes跑起来
 
@@ -126,6 +162,11 @@ Step2.启动minikube
 
 -------------------------------------------------
 
+
+-------------------------------------------------
+*************************************************
+
+
 ### 第2章 重要概念
 
 #### 1.Cluster
@@ -216,7 +257,10 @@ Step2.启动minikube
     default       Active   60s
     kube-system   Active   60s
     
+    
 -------------------------------------------------
+*************************************************
+
 
 ### 第3章 部署k8s集群-kubeadm
 
@@ -228,11 +272,21 @@ Step2.启动minikube
 
 -------------------------------------------------
 
+
+-------------------------------------------------
+*************************************************
+
+
 ### 第4章 k8s架构
 
 ![img](resources/images/14.jpg)  
 
 -------------------------------------------------
+
+
+-------------------------------------------------
+*************************************************
+
 
 ### 第5章 运行应用
 
@@ -1080,7 +1134,10 @@ kubectl get pod -o wide会查询多个失败Pod?
     [root@node1 k8s]# kubectl delete -f mycronjob.yml 
     cronjob.batch "hello" deleted
     
+    
 -------------------------------------------------
+*************************************************
+
 
 ### 第6章 通过service访问pod
 
@@ -1445,7 +1502,10 @@ kubectl get pod -o wide会查询多个失败Pod?
     
     目前支持的cloud provider有GCP,AWS,Azur等
     
+    
 -------------------------------------------------
+*************************************************
+
 
 ### 第7章 Rolling Update
 
@@ -1639,7 +1699,10 @@ kubectl get pod -o wide会查询多个失败Pod?
     
 >滚动更新：采用渐进的方式逐步替换旧版本，若更新不如预期，可回滚操作到更新前状态
     
+    
 -------------------------------------------------
+*************************************************
+
 
 ### 第8章 Health Check
 
@@ -2120,7 +2183,10 @@ kubectl get pod -o wide会查询多个失败Pod?
               initialDelaySeconds: 10
               periodSeconds: 5
   
+  
 -------------------------------------------------
+*************************************************
+
 
 ### 第9章 数据管理
 
@@ -2344,6 +2410,8 @@ kubectl get pod -o wide会查询多个失败Pod?
     
 #### 2.PersistentVolume(PV) & PersistentVolumeClaim(PVC)
 
+参考:[k8s持久化存储PV & UV](https://www.cnblogs.com/benjamin77/p/9944268.html)
+
 >Volume提供了好的数据持久化方案，但管理性上还有不足
     
     如前AWS EBS例：要使用Volume,Pod必须先知道
@@ -2375,35 +2443,44 @@ kubectl get pod -o wide会查询多个失败Pod?
 
 >Step1.node1(master)节点搭建NFS服务器
 
-    ##1.
-    $ yum install -y nfs-utils rpcbind
+参见[NFS服务器](NFS服务器.md)
+
+    ###1。安装nfs
+    $ yum -y install nfs-utils rpcbind
     
-    $ systemctl  start rpcbind
+    ###2。在NFS服务端上创建共享目录/export/nfs并设置权限
+    $ mkdir -p /nfsdata
+    $ chmod 666 /nfsdata
     
-    [root@node1 k8s]# systemctl status rpcbind
-    ● rpcbind.service - RPC bind service
-       Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; enabled; vendor preset: enabled)
-       Active: active (running) since Sat 2019-05-11 02:38:29 UTC; 8h ago
-     Main PID: 2223 (rpcbind)
-       CGroup: /system.slice/rpcbind.service
-               └─2223 /sbin/rpcbind -w
+    ###3。编辑export文件
+    $ vim /etc/exports
     
-    May 11 02:38:29 node1 systemd[1]: Starting RPC bind service...
-    May 11 02:38:29 node1 systemd[1]: Started RPC bind service.
+    ###add contents,将/nfsdata这个目录共享给192.168.1.*这些客户机
+    [root@node1 ~]# cat /etc/exports
+    /nfsdata 192.168.1.0/24(rw,no_root_squash,no_all_squash,sync)
+    或
+    /nfsdata *(rw,no_root_squash,no_all_squash,sync)   ##*代表所有机器
     
-    ##2.校验
-    [root@node1 k8s]# showmount -e
-    clnt_create: RPC: Program not registered
+    ###4。配置生效
+    $ exportfs -r
     
-    ###解决方案
-    [root@node1 k8s]# service nfs restart 
-    Redirecting to /bin/systemctl restart nfs.service
+    ###5。启动rpcbind、nfs服务
+    $ service rpcbind start
+    $ service nfs start
     
-    ##检验成功
-    [root@node1 k8s]# showmount -e 192.168.1.31
-    Export list for 192.168.1.31:
-    [root@node1 k8s]# showmount -e
+    ###6。查看 RPC 服务的注册状况
+    $ rpcinfo -p localhost  //不加localhost默认为本机
+    
+    ###7。server 端先自我测试一下是否可以联机
+    $ showmount -e localhost //不加localhost默认为本机
+    [root@node1 ~]# showmount -e
     Export list for node1:
+    /nfsdata 192.168.1.0/24    ##代表允许192.168.1.*的所有客户机挂载到目录/export/nfs目录下
+    
+    或 
+    [root@node1 nfsdata]# showmount -e
+    Export list for node1:
+    /nfsdata *  #用*允许所有主机
     
 >Step2.创建一个PV mypv1,配置文件nfs-pv1.yml(准备PV资源)
 
@@ -2421,7 +2498,7 @@ kubectl get pod -o wide会查询多个失败Pod?
       persistentVolumeReclaimPolicy: Recycle  ##3.指定当PV的回收策略为Recycle,支持三种回收策略(Recycle/Retain/Delete)
       storageClassName: nfs  ##4.指定PV的class为nfs。相当于为PV设置了一个分类，PVC可以指定class申请相应的class的PV
       nfs:
-        path: /nfsdata/pv1  ##5.指定PV在NFS服务器上对应的目录
+        path: /nfsdata/pv1  ##5.指定PV在NFS服务器上对应的目录(注意：事先需要先在/nfsdata目录下创建目录pv1)
         server: 192.168.1.31
         
     ###2.创建mypv1
@@ -2477,7 +2554,7 @@ kubectl get pod -o wide会查询多个失败Pod?
 
 >Step4.Pod中使用存储
 
-    ###1.
+    ###1.编写pod1.yml
     [root@node1 k8s]# cat pod1.yml 
     apiVersion: v1
     kind: Pod
@@ -2499,24 +2576,1603 @@ kubectl get pod -o wide会查询多个失败Pod?
           persistentVolumeClaim:
             claimName: mypvc1
             
-    ###2.
+    ###2.创建pod资源
+    [root@node1 k8s]# kubectl apply -f pod1.yml 
+    pod/mypod1 created
+    
+    ###3.若上述创建有问题，可能过下述命令查看出错原因
+    $ kubectl describe pod mypod
+    
+    ###4.查看pod状态信息
+    [root@node1 k8s]# kubectl get pod -o wide
+     NAME     READY   STATUS    RESTARTS   AGE   IP              NODE    NOMINATED NODE   READINESS GATES
+     mypod1   1/1     Running   0          11s   10.244.135.15   node3   <none>           <none>
+    
+    ###5.验证PV是否可用
+    [root@node1 k8s]# kubectl exec mypod1 touch /mydata/hello-pvc
+    [root@node1 k8s]# ls /nfsdata/pv1/
+    hello-pvc
+    
+    上述：在Pod中创建的文件/mydata/hello-pvc已保存到NFS服务器目录/nfsdata/pv1中
+    
+    ###6.进入pod查看容器
+    [root@node1 k8s]# kubectl exec -it mypod1 -- sh
+    / # ls
+    bin     dev     etc     home    mydata  proc    root    sys     tmp     usr     var
+    / # ls mydata
+    hello-pvc
+    
+    ###7.删除pod
+    [root@node1 k8s]# kubectl delete pod mypod1
+    pod "mypod1" deleted
+    
+##### 2-2.回收PV
+
+>当不需要使用PV时，可用删除PVC回收PV
+
+    ###1.删除pvc(删除pvc前需要先删除pod,否则删除pvc无法执行)
+    [root@node1 k8s]# kubectl delete pvc mypvc1
+    persistentvolumeclaim "mypvc1" deleted
+    
+    ###2.查看pod,k8s启动了一个新的pod,作用是清除PV mypv1的数据
+    [root@node1 k8s]# kubectl get pod -o wide
+    NAME                 READY   STATUS              RESTARTS   AGE   IP       NODE    NOMINATED NODE   READINESS GATES
+    recycler-for-mypv1   0/1     ContainerCreating   0          8s    <none>   node3   <none>           <none>
+    
+    ###3.查看mypv1状态，为Released表示已经解除了与mypvc1的Bound，status="Released"表示正在清除数据，此时还不可用,当status='Available'时代表该PV可被新的PVC申请
+    [root@node1 k8s]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+    mypv1   1Gi        RWO            Recycle          Available           nfs                     14h
+    
+    ###4.查看pvc已被清除
+    [root@node1 k8s]# kubectl get pvc
+    No resources found.  
+    
+    ###5.数据清除完毕，mypv1的状态重新变为Available，此时可被新的PVC申请 
+    
+    ###6.查看NFS服务器上的文件hello-pvc已被删除了
+    [root@node1 k8s]# ls /nfsdata/pv1/
+    
+    ###7.删除pv
+    [root@node1 k8s]# kubectl delete pv mypv1
+    persistentvolume "mypv1" deleted
+    
+>因PV的回收策略设置为Recycle，所以数据会被清除。若需保留数据，则可以将策略设置为Retain
+
+>实战：回收策略设置为Retain
+
+    ###1.
+    [root@node1 k8s]# cat nfs-pv2.yml 
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: mypv2
+    spec:
+      capacity:
+        storage: 1Gi
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: nfs
+      nfs:
+        path: /nfsdata/pv2   ##需要在NFS服务器/nfsdata目录下创建pv2目录
+        server: 192.168.1.31
+        
+    ###2.创建pv,回收类型为Retain
+    [root@node1 k8s]# kubectl apply -f nfs-pv2.yml 
+    persistentvolume/mypv2 created
+    [root@node1 k8s]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+    mypv2   1Gi        RWO            Retain           Available           nfs                     4s
+
+    ###3.
+    [root@node1 k8s]# cat nfs-pvc2.yml 
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: mypvc2
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: nfs
+      
+    ###4.创建pvc
+    [root@node1 k8s]# kubectl apply -f nfs-pvc2.yml 
+    persistentvolumeclaim/mypvc2 created
+    [root@node1 k8s]# kubectl get pvc
+    NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    mypvc2   Bound    mypv2    1Gi        RWO            nfs            3s
+    
+    ###5.
+    [root@node1 k8s]# cat pod2.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: mypod2
+    spec:
+      containers:
+        - name: mypod2
+          image: busybox
+          args:
+          - /bin/sh
+          - -c
+          - sleep 30000
+          volumeMounts:
+          - mountPath: "/mydata"
+            name: mydata
+      volumes:
+        - name: mydata
+          persistentVolumeClaim:
+            claimName: mypvc2
+
+    ###6.创建pod资源
+    [root@node1 k8s]# kubectl apply -f pod2.yml 
+    pod/mypod2 created
+    
+    ###7.查看pod状态
+    [root@node1 k8s]# kubectl get pod -o wide
+    NAME     READY   STATUS    RESTARTS   AGE   IP              NODE    NOMINATED NODE   READINESS GATES
+    mypod2   1/1     Running   0          11s   10.244.104.45   node2   <none>           <none>
+    
+    ###8.测试，在Pod中创建文件
+    [root@node1 k8s]# kubectl exec mypod2 touch /mydata/hello-pv
+    
+    ###9.查看NFS服务器该文件已存在
+    [root@node1 k8s]# ls /nfsdata/pv2/
+    hello-pv
+    
+    ###10.回收pvc
+    [root@node1 k8s]# kubectl delete pod mypod2
+    pod "mypod2" deleted
+    
+    [root@node1 k8s]# kubectl delete pvc mypvc2
+    persistentvolumeclaim "mypvc2" deleted
+    
+    [root@node1 k8s]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM            STORAGECLASS   REASON   AGE
+    mypv2   1Gi        RWO            Retain           Released   default/mypvc2   nfs                     9m37s
+    
+    ###此时再查看NFS服务器目录,文件依然存在
+    [root@node1 k8s]# ls /nfsdata/pv2/
+    hello-pv
+    
+    **上述：虽然mypv2中的数据得到了保留，但其PV状态一直处于Released,不能被其他PVC申请.为了重新使用资源，可删除并重新创建mypv1。删除操作只是删除了PV对象，存储空间中的数据并不会被删除**
+    
+    [root@node1 k8s]# kubectl delete pv mypv2
+    persistentvolume "mypv2" deleted
+    
+    **另：PV还支持Delete回收策略，会删除PV在Storage Provider上对应的存储空间。NFS的PV不支持Delete.支持Delete的Provier有AWS EBS,GCE PD,Azure Disk,Openstack Cinder Volume等**
+    
+##### 2-3.PV动态供给--StorageClass
+
+    上述例子，提前创建PV，通过PVC申请PV并在Pod中使用  --此种方式叫静态供给(static provision)
+    
+    与静态供给相对应--动态供给(Dynamical Provision):即如果没有满足PVC条件的PV，会动态创建PV
+    
+    动态供给较静态供给优势：不需要提前创建PV，减少了管理工作量，效率高
+    
+    动态供给是通过StorageClass实现的，StorageClass定义了如何创建PV。StorageClass支持Delete和Retain两种reclaimPolicy，默认Delete
+    
+>实战1。StorageClass standard -动态创建PV
+
+    [root@node1 k8s]# cat StorageClass-standard.yml 
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: standard  ##standard创建的是gp2类型的EBS
+    provisioner: kubernetes.io/aws-ebs
+    parameters:
+      type: gp2
+    reclaimPolicy: Retain
+    
+
+>实战2。StorageClass slow -动态创建PV
+
+    [root@node1 k8s]# cat StorageClass-slow.yml 
+    apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: slow ##slow创建的是io1类型的EBS
+    provisioner: kubernetes.io/aws-ebs
+    parameters:
+      type: io1
+      zones: us-east-1d, us-east-1c
+      iopsPerGB: "19"
+      
+    StorageClass支持Delete和Retain两种reclaimPolicy回收策略,默认是Delete
+    
+>上述，PVC在申请PV时，只需指定StorageClass，容量及访问模式即可
+
+    [root@node1 k8s]# cat nfs-pvc3.yml 
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: mypvc3
+    spec:
+      accessModes:
+        - ReadWriteOnce ##指定访问模式
+      resources:
+        requests:
+          storage: 1Gi ##指定容量
+      storageClassName: standard ##指定StorageClass
+    
+除AWS EBS,k8s还支持多种动态供给PV的Provisioner。[参见官方文档](https://kubernetes.io/docs/concepts/storage/storage-classes/#provisioner)
+
+#### 3.一个数据库例子
+
+>目标:如何为Mysql数据库提供持久化存储
+
+>步骤:
+
+    (1).创建PV和PVC
+    (2).部署mysql
+    (3).向mysql添加数据
+    (4).模拟节点宕机故障，k8s将mysql自动迁移到其他节点
+    (5).验证数据一致性
+    
+> 实战:
+
+    ###准备
+    [root@node1 mysql]# mkdir -p /nfsdata/mysql-pv
+
+1.创建PV和PVC
+
+    ###1.yaml配置
+    [root@node1 mysql]# cat mysql-pv.yml 
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: mysql-pv
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      capacity:
+        storage: 1Gi
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: nfs
+      nfs:
+        path: /nfsdata/mysql-pv
+        server: 192.168.1.31
+    
+    ###2. 
+    [root@node1 mysql]# cat mysql-pvc.yml 
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata: 
+      name: mysql-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: nfs
+      
+    ###3.创建pv
+    [root@node1 mysql]# kubectl apply -f mysql-pv.yml 
+    persistentvolume/mysql-pv created
+    
+    ###4.pvc申请
+    [root@node1 mysql]# kubectl apply -f mysql-pvc.yml 
+    persistentvolumeclaim/mysql-pvc created
+    
+    ###查询
+    [root@node1 mysql]# kubectl get pv,pvc
+    NAME                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM               STORAGECLASS   REASON   AGE
+    persistentvolume/mysql-pv   1Gi        RWO            Retain           Bound    default/mysql-pvc   nfs                     43s
+    
+    NAME                              STATUS   VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    persistentvolumeclaim/mysql-pvc   Bound    mysql-pv   1Gi        RWO            nfs            30s
+      
+2.部署mysql
+
+    ###1.mysql.yml(此处5.6镜像。5.7版本镜像拉取会报错)
+    [root@node1 mysql]# cat mysql.yml 
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: mysql
+    spec:
+      ports:
+      - port: 3306
+      selector:
+        app: mysql
+    
+    ---
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    metadata:
+      name: mysql
+    spec:
+      selector:
+        matchLabels:
+          app: mysql
+      template:
+        metadata:
+          labels:
+            app: mysql
+        spec:
+          containers:
+          - image: mysql:5.6
+            name: mysql
+            env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+            ports:
+            - containerPort: 3306
+              name: mysql
+            volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+          volumes:
+          - name: mysql-persistent-storage
+            persistentVolumeClaim:
+              claimName: mysql-pvc
+
+    ###2.创建资源
+    [root@node1 mysql]# kubectl apply -f mysql.yml 
+    service/mysql created
+    deployment.apps/mysql created
+    
+    ###3.查看deployment
+    [root@node1 mysql]# kubectl get deployment -o wide
+    NAME    READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES      SELECTOR
+    mysql   1/1     1            1           2m43s   mysql        mysql:5.6   app=mysql
+    
+    ###4.查看pod(mysql被部署到node2节点上)
+    [root@node1 mysql]# kubectl get pod -o wide
+    NAME                     READY   STATUS    RESTARTS   AGE     IP              NODE    NOMINATED NODE   READINESS GATES
+    mysql-7686899cf9-tggfs   1/1     Running   0          2m58s   10.244.104.47   node2   <none>           <none>
+    
+    ###5.查看service
+    [root@node1 mysql]# kubectl get service
+    NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+    kubernetes   ClusterIP   10.1.0.1       <none>        443/TCP    46d
+    mysql        ClusterIP   10.1.116.144   <none>        3306/TCP   3m18s
+    
+    ##6.查看详细日志
+    $ kubectl describe pod mysql-7686899cf9-tggfs
+    $ kubectl describe deployment mysql
+    
+    ###7.客户端访问Service mysql
+    [root@node1 mysql]# kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -ppassword
+    If you don't see a command prompt, try pressing enter.
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 1
+    Server version: 5.6.44 MySQL Community Server (GPL)
+    
+    Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+    
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. Other names may be trademarks of their respective
+    owners.
+    
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    
+    mysql> create database syf;
+    Query OK, 1 row affected (0.01 sec)
+    
+    mysql> use syf
+    Database changed
+    mysql> create table my_id(id int(4));
+    Query OK, 0 rows affected (0.05 sec)
+    
+    mysql> insert into my_id values(111);
+    Query OK, 1 row affected (0.00 sec)
+    
+    mysql> select * from my_id;
+    +------+
+    | id   |
+    +------+
+    |  111 |
+    +------+
+    1 row in set (0.00 sec)
+    
+    ###8.模拟node2节点宕机故障
+    [root@node2 ~]# shutdown now
+    Connection to node2 closed by remote host.
+    Connection to node2 closed.
+    
+    ###9.查看pod,k8s将mysql迁移到node3节点上(需要一段时间)
+    [root@node1 k8s]# kubectl get pod -o wide
+    NAME                     READY   STATUS        RESTARTS   AGE   IP              NODE    NOMINATED NODE   READINESS GATES
+    mysql-7686899cf9-rkg7q   1/1     Running       0          9s    10.244.135.20   node3   <none>           <none>
+    mysql-7686899cf9-tggfs   1/1     Terminating   0          18m   10.244.104.47   node2   <none>           <none>
+    mysql-client             1/1     Running       0          10m   10.244.135.19   node3   <none>           <none>
+    
+    ###10.验证数据一致性(mysql服务恢复，数据也完好无损)
+    [root@node1 k8s]# kubectl exec -it mysql-client -- mysql -h mysql -ppassword
+    Warning: Using a password on the command line interface can be insecure.
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 1
+    Server version: 5.6.44 MySQL Community Server (GPL)
+    
+    Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+    
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. Other names may be trademarks of their respective
+    owners.
+    
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    
+    mysql> use syf
+    Reading table information for completion of table and column names
+    You can turn off this feature to get a quicker startup with -A
+    
+    Database changed
+    mysql> select * from my_id;
+    +------+
+    | id   |
+    +------+
+    |  111 |
+    +------+
+    1 row in set (0.00 sec)
+    
+>小结
+
+    1.emptyDir和hostPath类型的Volume很方便，但持久性不强，k8s支持多种外部存储系统的volume
+    
+    2.pv和pvc分离了管理员和普通用户的职责，更适合生产环境。并学习如何通过StorageClass实现更高效的动态供给
+    
+    3.如何在mysql中使用PersistentVolume实现数据持久化性
+    
+    
+-------------------------------------------------
+*************************************************
+
+
+### 第10章 Secret(处理敏感信息) & Configmap
+
+    敏感信息，直接保存在容器镜像中显然不妥，比如用户名、密码等。K8s提供的解决方案是Secret。
+    
+    Secret会以密文的方式存储数据，避免了在配置文件中保存敏感信息。Secret会以Volume的形式被mount到Pod，容器可通过文件的方式使用Secret中的敏感数据；
+    
+    此外，容器也可以"环境变量"的方式使用这些数据。Secret可通过命令行或YAML创建。
+    
+#### 1.创建secret--处理敏感信息
+
+>四种方法创建secret
+
+##### 1-1. --from-literal : --from-literal对应一个条目
+
+    #创建secret
+    [root@node1 ~]# kubectl create secret generic mysecret --from-literal=username=syf --from-literal=password=123
+    secret/mysecret created
+    
+    #查询secret
+    [root@node1 ~]# kubectl get secret
+    NAME                  TYPE                                  DATA   AGE
+    default-token-gtn9w   kubernetes.io/service-account-token   3      50d
+    mysecret              Opaque                                2      21s
+
+##### 1-2. --from-file:每个文件对应一个条目
+
+     #向文件中写入密码
+    [root@node1 ~]# echo -n 123456 > ./pas
+     #向文件中写入用户
+    [root@node1 ~]# echo -n kaixinyufeng > ./user
+     #创建secret
+    [root@node1 ~]# kubectl create secret generic mysecret2 --from-file=./user --from-file=./pas
+    secret/mysecret2 created
+     #查询secret
+    [root@node1 ~]# kubectl get secret
+    NAME                  TYPE                                  DATA   AGE
+    default-token-gtn9w   kubernetes.io/service-account-token   3      50d
+    mysecret              Opaque                                2      2m33s
+    mysecret2             Opaque                                2      4s
+     
+##### 1-3. 通过--from-env-file:文件中的key=value对应一个条目
+
+    # cat << EOF > env.txt 是覆盖模式，cat <<EOF >>env.txt是追加模式
+    # 向文件env.txt中写
+    [root@node1 ~]# cat << EOF > env.txt
+    > username=yufeng
+    > password=666
+    > EOF
+    
+    #从env.txt文件中读
+    [root@node1 ~]# cat env.txt 
+    username=yufeng
+    password=666   
+    
+    #创建secret
+    [root@node1 ~]# kubectl create secret generic mysecret3 --from-env-file=env.txt
+    secret/mysecret3 created
+    
+    #查询secret
+    [root@node1 ~]# kubectl get secret
+    NAME                  TYPE                                  DATA   AGE
+    default-token-gtn9w   kubernetes.io/service-account-token   3      50d
+    mysecret              Opaque                                2      10m
+    mysecret2             Opaque                                2      7m47s
+    mysecret3             Opaque                                2      2m27s
+    
+##### 1-4. 通过YAML配置文件
+
+**secret里面存储的数据必须是通过base64编码后的结果**
+
+    #先获取base64
+    [root@node1 ~]# echo -n shiyufeng | base64
+    c2hpeXVmZW5n
+    [root@node1 ~]# echo -n 8989 | base64
+    ODk4OQ==
+    
+    #编辑yaml文件
+    [root@node1 k8s]# cat secret.yml 
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysecret4
+    data:
+      username: c2hpeXVmZW5n   #base64后的值
+      password: ODk4OQ==
+    
+    #创建secret
+    [root@node1 k8s]# kubectl apply -f secret.yml 
+    secret/mysecret4 created
+    
+    #查询secret
+    [root@node1 k8s]# kubectl get secret
+    NAME                  TYPE                                  DATA   AGE
+    default-token-gtn9w   kubernetes.io/service-account-token   3      50d
+    mysecret              Opaque                                2      14m
+    mysecret2             Opaque                                2      11m
+    mysecret3             Opaque                                2      6m31s
+    mysecret4             Opaque                                2      10s
+
+    #查看secret明细
+    [root@node1 k8s]# kubectl describe secret mysecret2
+    Name:         mysecret2
+    Namespace:    default
+    Labels:       <none>
+    Annotations:  <none>
+    
+    Type:  Opaque
+    
+    Data
+    ====
+    pas:   6 bytes
+    user:  12 bytes
+    
+    #查看secret具体内容
+    [root@node1 k8s]# kubectl edit secret mysecret4
+    
+    #显示内容
+    apiVersion: v1
+    data:
+      password: ODk4OQ==
+      username: c2hpeXVmZW5n
+    kind: Secret
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/last-applied-configuration: |
+          {"apiVersion":"v1","data":{"password":"ODk4OQ==","username":"c2hpeXVmZW5n"},"kind":"Secret","metadata":{"annotations":{},"name":"mysecret4","namespace":"default"}}
+      creationTimestamp: "2019-05-18T07:37:45Z"
+      name: mysecret4
+      namespace: default
+      resourceVersion: "366645"
+      selfLink: /api/v1/namespaces/default/secrets/mysecret4
+      uid: d3a228c1-793f-11e9-a4b7-525400261060
+    type: Opaque
+    
+    #应用base64解码
+    [root@node1 k8s]# echo -n c2hpeXVmZW5n| base64 --decode
+    shiyufeng
+
+#### 2.在Pod中使用Secret
+
+##### 2-1.Volume方式
+
+    ##编辑yaml
+    [root@node1 k8s]# cat mypod-secret.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: mypod
+    spec:
+      containers:
+      - name: mypod
+        image: busybox
+        args:
+          - /bin/sh
+          - -c
+          - sleep 10; touch /tmp/healthy; sleep 30000
+        volumeMounts:
+        - name: foo
+          mountPath: "/etc/foo"    # 在容器内部的该路径下
+          readOnly: true
+      volumes:
+      - name: foo
+        secret:
+          secretName: mysecret     # 指定有前面创建的mysecret
+
+    ##创建Pod
+    [root@node1 k8s]# kubectl apply -f mypod-secret.yml 
+    pod/mypod created
+    
+    ##查询pod
+    [root@node1 k8s]# kubectl get pod
+    NAME                     READY   STATUS    RESTARTS   AGE
+    mypod                    1/1     Running   0          15s
+    mysql-7686899cf9-rkg7q   1/1     Running   1          4d5h
+    mysql-client             0/1     Error     0          4d5h
+    
+    ##进入容器
+    [root@node1 k8s]# kubectl exec -it mypod sh
+    / # cd /etc/foo   ##进入
+    
+    /etc/foo # ls
+    password  username
+    
+    /etc/foo # cat username   ##可直接查看内容，是明文
+    syf/etc/foo # cat password
+    123/etc/foo # exit
+
+>k8s会在指定路径下为每条敏感信息创建一个文件.文件名是数据条目的Key, 
+>/etc/foo/username和 etc/foo/password, value是以明文的形式存放在文件中
+
+     ###删除Pod
+    [root@node1 k8s]# kubectl delete pod mypod
+    pod "mypod" deleted
+
+>可自定义存放数据的文件名，配置文件如下改动：这时，数据将存放在/etc/foo/my-group/my-username中
+
+    [root@node1 k8s]# cat mypod-secret2.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: mypod
+    spec:
+      containers:
+      - name: mypod
+        image: busybox
+        args:
+          - /bin/sh
+          - -c
+          - sleep 10; touch /tmp/healthy; sleep 30
+        volumeMounts:
+        - name: foo
+          mountPath: "/etc/foo"
+          readOnly: true
+      volumes:
+      - name: foo
+        secret:
+          secretName: mysecret  #指定secret名称
+          items:
+          - key: username
+            path: my-group/my-username  #自定义存放数据文件名
+          - key: password
+            path: my-group/my-password
+
+    [root@node1 k8s]# kubectl apply -f mypod-secret2.yml 
+    pod/mypod created
+    
+    [root@node1 k8s]# kubectl get pod
+    NAME                     READY   STATUS    RESTARTS   AGE
+    mypod                    1/1     Running   2          2m16s
+    mysql-7686899cf9-rkg7q   1/1     Running   1          4d5h
+    mysql-client             0/1     Error     0          4d5h
+    
+    [root@node1 k8s]# kubectl exec -it mypod sh
+    / # cd /etc/foo/
+    /etc/foo # ls
+    my-group
+    
+    [root@node1 k8s]# kubectl delete pod mypod
+    pod "mypod" deleted
+    
+**以Volume方式使用secret支持动态更新：Secret更新后，容器中的数据也会更新**
+
+##### 2-2.环境变量方式
+
+>通过volume方式使用secret，容器必须从文件读取数据，稍显麻烦。K8s支持通过环境变量使用secret。
+
+    [root@node1 k8s]# cat mypod_env.yml 
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: mypod
+    spec:
+      containers:
+      - name: mypod
+        image: busybox
+        args:
+          - /bin/sh
+          - -c
+          - sleep 10; touch /tmp/healthy; sleep 30000
+        env:
+          - name: SECRET_USERNAME        # 环境变量名字
+            valueFrom:                   
+              secretKeyRef:
+                name: mysecret           # 从哪个secret来
+                key: username            # key
+          - name: SECRET_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: password
+                
+    [root@node1 k8s]# kubectl apply -f mypod_env.yml 
+    pod/mypod created
+    
+    [root@node1 k8s]# kubectl get pod
+    NAME                     READY   STATUS    RESTARTS   AGE
+    mypod                    1/1     Running   0          26s
+    mysql-7686899cf9-rkg7q   1/1     Running   1          4d5h
+    mysql-client             0/1     Error     0          4d6h
+    
+    通过环境变量SECRET_USERNAME 和 SECRET_PASSWORD就可以读取到secret的数据.
+    
+**注意：环境变量的方式不支持Secret动态更新**
+
+#### 3.ConfigMap
+
+    Secret可以为Pod提供密码、Token、私钥等敏感数据；对于一些非敏感数据，比如一些配置信息，则可以用ConfigMap
+    
+    configMap的使用方式与Secret非常类似，不同的是数据是以明文的形式存放。
+    
+    创建方式也是四种（和Secret一样，不同的是kubectl create Secret 变成 kubectl create Configmap; 另外一个不同是：在yml文件中使用的时候，Secret 换成Configmap）
+
 
 -------------------------------------------------
+*************************************************
+
+
+### 第11章 Helm-kubernetes的包管理器
+
+>Helm : k8s的包管理器
+
+>术语
+
+    Helm : Kubernetes的应用打包工具，也是命令行工具的名称
+    
+    Tiller: Helm的服务端，部署在Kubernetes集群中，用于处理Helm的相关命令
+    
+    Chart: Helm的打包格式，内部包含了一组相关的kubernetes资源
+    
+    Repoistory: Helm的软件仓库，repository本质上是一个web服务器，该服务器保存了chart软件包以供下载，并有提供一个该repository的chart包的清单文件以供查询。在使用时，Helm可以对接多个不同的Repository
+    
+    Release: 使用Helm install命令在Kubernetes集群中安装的Chart称为Release
+
+#### 1.why Helm
+
+    K8s能够很好的组织和编排容器，但它缺少一个更高层次的应用打包工具，Helm就是干这个的。
+    
+    　　比如对于一个MySQL服务，K8s需要部署如下对象：
+    
+    　　（1）Service，让外界能访问MySQL
+    
+    　　（2）Secret，定义MySQL的密码
+    
+    　　（3）PersisentVolumeClaim,为MySQL申请持久化存储空间。
+    
+    　　（4）Deployment，部署MySQL Pod，并使用上面的这些支持对象。
+    
+    可以将上面这些配置保存到文件中，或几种写进一个文件，然后通过kubectl apply -f 部署。
+    
+    　　如果服务少，这样问题也不大，但是如果是微服务架构，服务多达数十个甚至上百个，这种组织和管理应用的方式就不好使了：
+    
+    　　（1）很难管理、编辑和维护如此多的服务。每个服务有若干个配置，缺乏更高层次的工具将这些配置组织起来。
+    
+    　　（2）不容易将这些服务作为一个整体统一发布。部署人员需要首先理解应用都包含哪些服务，然后按照逻辑顺序依次执行kubectl apply, 缺少一种工具定义应用与服务，以及服务之间的依赖。
+    
+    　　（3）不能高效的共享和重用服务。比如两个应用都用到MySQL服务，但是配置参数不一样，这两个应用只能分别复制一套标准MySQL配置文件，修改后通过kubectl apply部署。也就是不支持参数化配置和多环境部署。
+    
+    　　（4）不支持应用级别的版本管理。虽然可以通过kubectl rollout undo进行回滚，但这只针对单个deployment，不支持整个应用的的回滚。
+    
+    　　（5）不支持对部署的应用状态进行验证。比如是否能通过预定义账号访问MySQL。虽然K8s有健康检查，但那是针对单个容器，我们需要应用（服务）级别的健康检查。
+    
+    　　Helm能够解决上面这些问题。
+    
+#### 2.Helm架构
+
+![image](resources/images/helm.jpg)
+
+>Helm有两个重要概念：chart和release
+
+##### (1).chart
+
+    chart:是创建一个应用的信息集合，包括各种k8s对象的配置模板、参数定义、依赖关系、文档说明等。chart是应用部署的自包含逻辑单元。可以将char想象成apt、yum中的软件安装包
+
+##### (2).release
+
+    release:是chart的运行实例，代表了一个正在运行的应用。当chart被安装到k8s集群，就生成一个release。chart能够多次安装到同一个集群，每次安装都是一个release
+
+>Helm是包管理工具，这里的包就是指chart。 Helm能够：
+
++ 从零创建新chart
++ 与存储chart的仓库交互。拉取、保存、和更新chart
++ 在k8s集群中安装和卸载release
++ 更新、回滚和测试release
+
+>Helm包含两个组件： Heml客户端 和 Tiller服务器
+
++ Helm客户端用户可以：
+
+    + 在本地开发chart
+    + 管理chart仓库
+    + 与Tiller服务器交互
+    + 在远程K8s集群上安装chart
+    + 查看release信息
+    + 升级或卸载已有的release
+
++ Tiller服务器运行在K8s集群中。它会处理Helm客户端的请求，与k8s的API Server交互。Tiller服务器负责:
+
+    + 监听来自Helm客户端的请求
+    + 通过chart创建release
+    + 在k8s中安装chart，并跟踪release状态
+    + 通过API server升级或卸载已有的release
+    
+>总结：Helm客户端负责管理chart,Tiller服务器负责管理release
+
+#### 3.安装Helm
+
+**注意：heml安装客户端与服务端版本需要一致，否则会报错**
+
+##### 3-1 Helm客户端
+
+    wget https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz
+    
+    [root@node1 helm]# tar -zxvf helm-v2.13.1-linux-amd64.tar.gz 
+    linux-amd64/
+    linux-amd64/LICENSE
+    linux-amd64/tiller
+    linux-amd64/helm
+    linux-amd64/README.md
+    
+    [root@node1 helm]# cd linux-amd64/
+    
+    [root@node1 linux-amd64]# cp helm /usr/local/bin/helm
+    [root@node1 linux-amd64]# helm help
+
+##### 3-2 Tiller服务器
+
+    Step1:在集群的每个节点安装socat软件
+    $ yum install -y socat 
+    
+    Step2:master节点安装Tiller(Helm服务端)
+    #创建服务端
+    [root@node1 ~]# helm init --service-account tiller --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.13.1  --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+    $HELM_HOME has been configured at /root/.helm.
+    
+    Tiller (the Helm server-side component) has been upgraded to the current version.
+    Happy Helming!
+
+    #创建tls认证服务端
+    [root@node1 ~]# helm init --service-account tiller --upgrade -i registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.13.1 --tiller-tls-cert /etc/kubernetes/ssl/tiller001.pem --tiller-tls-key /etc/kubernetes/ssl/tiller001-key.pem --tls-ca-cert /etc/kubernetes/ssl/ca.pem --tiller-namespace kube-system --stable-repo-url https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+    $HELM_HOME has been configured at /root/.helm.
+    
+    Tiller (the Helm server-side component) has been upgraded to the current version.
+    Happy Helming!
+    
+    Step3:上述若遇到错误，可应用如下命令创建serviceaccount tiller并给它集群管理权限
+    [root@node1 ~]# kubectl create serviceaccount --namespace kube-system tiller
+    serviceaccount/tiller created
+    [root@node1 ~]# kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+    clusterrolebinding.rbac.authorization.k8s.io/tiller-cluster-rule created
+    [root@node1 ~]# kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+    deployment.extensions/tiller-deploy patched (no change)
+    
+    Step4:验证是否安装成功
+    [root@node1 mysql]# helm version
+    Client: &version.Version{SemVer:"v2.13.1", GitCommit:"618447cbf203d147601b4b9bd7f8c37a5d39fbb4", GitTreeState:"clean"}
+    Server: &version.Version{SemVer:"v2.13.1", GitCommit:"618447cbf203d147601b4b9bd7f8c37a5d39fbb4", GitTreeState:"clean"}
+    
+    Step5:查看Pod运行情况
+    [root@node1 mysql]# kubectl get pod -o wide --all-namespaces | grep tiller
+    kube-system   tiller-deploy-6df646875f-l7jgk             1/1     Running   0          2m28s   10.244.104.53    node2   <none>           <none>
+    
+    
+    ##如下查看Tiller的Service、deployment和Pod
+    
+    ---------
+    
+    ###1.查看tiller的service
+    [root@node1 ~]# kubectl get -n kube-system svc | grep tiller
+    tiller-deploy   ClusterIP   10.1.97.18   <none>        44134/TCP       31m
+    
+    或
+    
+    [root@node1 ~]# kubectl get -n kube-system svc tiller-deploy -o wide
+    NAME            TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE   SELECTOR
+    tiller-deploy   ClusterIP   10.1.97.18   <none>        44134/TCP   31m   app=helm,name=tiller
+    
+    ----------
+    
+    ###2.查看tiller的deployment
+    [root@node1 ~]# kubectl get -n kube-system deployment | grep tiller
+    tiller-deploy             1/1     1            1           15m
+    
+    或
+    
+    [root@node1 ~]# kubectl get -n kube-system deployment tiller-deploy -o wide
+    NAME            READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                              SELECTOR
+    tiller-deploy   1/1     1            1           32m   tiller       registry.cn-hangzhou.aliyuncs.com/google_containers/tiller:v2.13.1   app=helm,name=tiller
+    
+    ----------
+    
+    ###3.查看tiller的pod
+    
+    [root@node1 ~]# kubectl get -n kube-system pod | grep tiller
+    tiller-deploy-6df646875f-l7jgk               1/1     Running   0          13m
+    
+    或
+    
+    [root@node1 ~]# kubectl get -n kube-system pod tiller-deploy-8f67bd57d-wnz7h -o wide
+    NAME                             READY   STATUS    RESTARTS   AGE     IP              NODE    NOMINATED NODE   READINESS GATES
+    tiller-deploy-6df646875f-l7jgk   1/1     Running   0          6m59s   10.244.104.53   node2   <none>           <none>
+
+#### 4.使用Helm
+
+>查看仓库
+
+    #查看仓库
+    [root@node1 ~]# helm repo list
+    NAME  	URL                                                   
+    stable	https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts   ##stable是官方仓库
+    local 	http://127.0.0.1:8879/charts                             ##local是用户存放自己开发的chart的本地仓库
+    
+>可通过helm repo add 添加更多个仓库
+
+    # 先移除原先的仓库
+    helm repo remove stable
+    # 添加新的仓库地址
+    helm repo add stable https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+    # 更新仓库
+    helm repo update
+
+>查看当前可以安装的char: helm search
+
+    ##搜索可以安装的Mysql-chart
+    [root@node1 ~]# helm search mysql
+    NAME                         	CHART VERSION	APP VERSION	DESCRIPTION                                                 
+    stable/mysql                 	0.3.5        	           	Fast, reliable, scalable, and easy to use open-source rel...
+    stable/percona               	0.3.0        	           	free, fully compatible, enhanced, open source drop-in rep...
+    stable/percona-xtradb-cluster	0.0.2        	5.7.19     	free, fully compatible, enhanced, open source drop-in rep...
+    stable/gcloud-sqlproxy       	0.2.3        	           	Google Cloud SQL Proxy                                      
+    stable/mariadb               	2.1.6        	10.1.31    	Fast, reliable, scalable, and easy to use open-source rel...
+
+>安装chat  
+
+    ##安装Mysql
+    [root@node1 mysql]# helm install stable/mysql
+    NAME:   manageable-tiger    ### release的名字， 如果不用-n指定名字，这里就随机生成
+    LAST DEPLOYED: Sun May 19 02:28:48 2019
+    NAMESPACE: default      ### 命名空间，可以通过--namespace指定
+    STATUS: DEPLOYED        ### 状态是DEPLOYED， 表示已经将chart部署到集群
+    
+    RESOURCES:              ### 当前release包含的资源，PersistentVolumeClaim，POD， secret,service,deployment,configmap
+    ==> v1/PersistentVolumeClaim
+    NAME                    STATUS   VOLUME  CAPACITY  ACCESS MODES  STORAGECLASS  AGE
+    manageable-tiger-mysql  Pending  0s
+    
+    ==> v1/Pod(related)
+    NAME                                     READY  STATUS   RESTARTS  AGE
+    manageable-tiger-mysql-5ffc6757fb-hd8qh  0/1    Pending  0         0s
+    
+    ==> v1/Secret
+    NAME                    TYPE    DATA  AGE
+    manageable-tiger-mysql  Opaque  2     0s
+    
+    ==> v1/Service
+    NAME                    TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)   AGE
+    manageable-tiger-mysql  ClusterIP  10.1.127.222  <none>       3306/TCP  0s
+    
+    ==> v1beta1/Deployment
+    NAME                    READY  UP-TO-DATE  AVAILABLE  AGE
+    manageable-tiger-mysql  0/1    1           0          0s
+    
+    
+    NOTES:      ### 显示的是release的使用方法
+    MySQL can be accessed via port 3306 on the following DNS name from within your cluster:
+    manageable-tiger-mysql.default.svc.cluster.local
+    
+    To get your root password run:
+    
+        MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default manageable-tiger-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo)
+    
+    To connect to your database:
+    
+    1. Run an Ubuntu pod that you can use as a client:
+    
+        kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+    
+    2. Install the mysql client:
+    
+        $ apt-get update && apt-get install mysql-client -y
+    
+    3. Connect using the mysql cli, then provide your password:
+        $ mysql -h manageable-tiger-mysql -p
+    
+    To connect to your database directly from outside the K8s cluster:
+        MYSQL_HOST=127.0.0.1
+        MYSQL_PORT=3306
+    
+        # Execute the following commands to route the connection:
+        export POD_NAME=$(kubectl get pods --namespace default -l "app=manageable-tiger-mysql" -o jsonpath="{.items[0].metadata.name}")
+        kubectl port-forward $POD_NAME 3306:3306
+    
+        mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
+    
+>查看已经部署的release
+
+    [root@node1 mysql]# helm list
+    NAME            	REVISION	UPDATED                 	STATUS  	CHART      	APP VERSION	NAMESPACE
+    manageable-tiger	1       	Sun May 19 02:28:48 2019	DEPLOYED	mysql-0.3.5	           	default 
+    
+>删除release
+
+    [root@node1 mysql]# helm delete manageable-tiger
+    release "manageable-tiger" deleted
+    
+    上述并未完全删除
+    
+    #查看，status为DELETED,此时不能创建同名chart
+    [root@node1 mysql]# helm list --all
+    NAME            	REVISION	UPDATED                 	STATUS 	CHART      	APP VERSION	NAMESPACE
+    manageable-tiger	1       	Sun May 19 02:28:48 2019	DELETED	mysql-0.3.5	           	default 
+    
+    ##完全删除
+    [root@node1 mysql]# helm delete --purge manageable-tiger
+    release "manageable-tiger" deleted
+
+#### 5.chart详解
+
+    chart由一系列文件组成，这些文件描述了K8s部署应用时需要的资源，比如Servcie、Deployment、PersistentVolmeClaim、Secret、ConfigMap等。
+    
+    chart可以很复杂，部署整个应用，比如包含HTTP servers、Database、消息中间件、Cache等。
+    
+    chart将这些文件放置在预定义的目录结构中，通常被打包成tar包，而且标注上版本信息，便于Helm部署。
+    
+##### 5-1.chart目录结构
+
+>一旦安装了某个chart，就可以在 ~/.helm/cache/archive中找到chart的tar包
+
+    ##查看char的tar包
+    [root@node1 mysql]# ls ~/.helm/cache/archive/
+    mysql-0.3.5.tgz
+    
+    ##解压缩
+    [root@node1 mysql]# tar -zxvf ~/.helm/cache/archive/mysql-0.3.5.tgz -C /home/k8s/mysql/
+    
+    [root@node1 mysql]# ls
+    mysql  
+    [root@node1 mysql]# ls mysql
+    Chart.yaml  README.md  templates  values.yaml
+    
+    ##(1)描述chart的概要信息
+    [root@node1 mysql]# cat Chart.yaml 
+    description: Fast, reliable, scalable, and easy to use open-source relational database
+      system.
+    engine: gotpl
+    home: https://www.mysql.com/
+    icon: https://www.mysql.com/common/logos/logo-mysql-170x115.png
+    keywords:
+    - mysql
+    - database
+    - sql
+    maintainers:
+    - email: viglesias@google.com
+      name: Vic Iglesias
+    name: mysql   #必填
+    sources:
+    - https://github.com/kubernetes/charts
+    - https://github.com/docker-library/mysql
+    version: 0.3.5  #必填
+    
+    ##(2)README.md
+    
+    ##(3)LICENSE:描述chart的许可信息，此文件为可选
+    
+    ##(4)requirements.yaml:指定chart的依赖关系，安装过程中，依赖的chart也会被安装
+    
+    ##(5)values.yaml:chart支持在安装时根据参数进行定制化配置，而values.xml则提供了这些配置参数的默认值
+    
+    ##(6)templates: k8s各种资源的配置模板都在这。Helm会将values.yaml中的参数值注入模板中，生成标准的YAML配置文件。
+                    模板是chart的最重要的部分，也是Helm最强大的地方。模板增加了应用部署的灵活性，能够适用不同的环境
+    
+    [root@node1 mysql]# ls templates/
+    configmap.yaml  deployment.yaml  _helpers.tpl  NOTES.txt  pvc.yaml  secrets.yaml  svc.yaml
+    
+    ##(7)templates/NOTES.txt: chart的简易适用文档
+
+##### 5-2.chart模版
+
+    大部分属性变成了 {{XXX}}。 这些实际上是模板语法。 Helm采用GO语言的模板编写chart。Go模板非常强大，支持变量、对象、函数、流控制等功能
+    
+    [root@node1 mysql]# ls templates/
+    configmap.yaml  deployment.yaml  _helpers.tpl  NOTES.txt  pvc.yaml  secrets.yaml  svc.yaml
+    
+    以secrets.yaml为例说明:
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: {{ template "mysql.fullname" . }}  ##定义secret的name。关键字template的作用是引用一个模板mysql.fullname
+      labels:
+        app: {{ template "mysql.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    type: Opaque
+    data:
+      {{ if .Values.mysqlRootPassword }}
+      mysql-root-password:  {{ .Values.mysqlRootPassword | b64enc | quote }}
+      {{ else }}
+      mysql-root-password: {{ randAlphaNum 10 | b64enc | quote }}
+      {{ end }}
+      {{ if .Values.mysqlPassword }}
+      mysql-password:  {{ .Values.mysqlPassword | b64enc | quote }}
+      {{ else }}
+      mysql-password: {{ randAlphaNum 10 | b64enc | quote }}
+      {{ end }}
+    ~               
+    
+#### 6.实践mysql chart
+
+    安装之前需要清楚chart的使用方法。这些信息保存在values.yaml和README.MD,可以使用如下命令查看：
+    
+    ###阅读注释可以知道MySQL  chart支持哪些参数，安装前需要哪些准备。
+    
+    ---------
+    
+    ##查看所需要的资源参数    
+    [root@node1 mysql]# helm inspect values stable/mysql  ##输出的是Values.yaml(定义参数)的内容
+    ## mysql image version
+    ## ref: https://hub.docker.com/r/library/mysql/tags/
+    ##
+    image: "mysql"
+    imageTag: "5.7.14"
+    
+    ## Specify password for root user
+    ##
+    ## Default: random 10 character string
+    # mysqlRootPassword: testing
+    
+    ## Create a database user
+    ##
+    # mysqlUser:
+    # mysqlPassword:
+    
+    ## Allow unauthenticated access, uncomment to enable
+    ##
+    # mysqlAllowEmptyPassword: true
+    
+    ## Create a database
+    ##
+    # mysqlDatabase:
+    
+    ## Specify an imagePullPolicy (Required)
+    ## It's recommended to change this to 'Always' if the image tag is 'latest'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#updating-images
+    ##
+    imagePullPolicy: IfNotPresent
+    
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
+    
+    readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 1
+      successThreshold: 1
+      failureThreshold: 3
+    
+    ## Persist data to a persistent volume
+    persistence:
+      enabled: true
+      ## database data Persistent Volume Storage Class
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
+      # storageClass: "-"
+      accessMode: ReadWriteOnce    ##注意此处存储需要的参数值
+      size: 8Gi     ##注意此处存储需要的参数值
+    
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+    
+    # Custom mysql configuration files used to override default mysql settings
+    configurationFiles:
+    #  mysql.cnf: |-
+    #    [mysqld]
+    #    skip-name-resolve
+    
+    
+    ## Configure the service
+    ## ref: http://kubernetes.io/docs/user-guide/services/
+    service:
+      ## Specify a service type
+      ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services---service-types
+      type: ClusterIP
+      port: 3306
+      # nodePort: 32000
+
+    ------------
+    
+    ##chart定义了一个PVC， 申请存储空间。 因为实验环境不支持动态供给，所以要先申请PV(按上述例子【部署mysql】)
+    ##Step1:申请PV
+    [root@node1 mysql]# cat helm-mysql-pv.yml 
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: db-pv
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      capacity:
+        storage: 8Gi
+      persistentVolumeReclaimPolicy: Retain
+      #storageClassName: nfs
+      nfs:
+        path: /nfsdata/db-pv  #需要事先在nfsdata目录创建db-pv目录
+        server: 192.168.1.31
+        
+    [root@node1 mysql]# kubectl apply -f helm-mysql-pv.yml 
+    persistentvolume/db-pv created
+    
+    [root@node1 mysql]# kubectl get pv
+    NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+    db-pv   8Gi        RWO            Retain           Available                                   3s
+    
+    --------------
+    
+    ##Step2:安装chart--定制化安装chart
+    
+    可以接受values.yml的默认值，也可定制化，比如设置mysqlRootPassword。Helm支持两种方法传递参数
+    
+    (1).指定自己的values文件, 通常做法是:helm inspect values mysql > myvalues.yaml生成values文件，然后设置mysqlRootPassword,最后执行
+    
+        helm install --values=myvalues.yaml  mysql
+    
+    (2).使用--set 直接传入参数值(采用本方式)
+    
+        helm install stable/mysql --set mysqlRootPassword=syf -n syfdb
+    
+    通过helm list 和  helm status XXX 可以查看chart的最新状态
+    
+    ####安装chart,利用--set自定义值
+    [root@node1 mysql]# helm install stable/mysql --set mysqlRootPassword=syf -n syfdb
+    NAME:   syfdb
+    LAST DEPLOYED: Mon May 20 03:40:22 2019
+    NAMESPACE: default
+    STATUS: DEPLOYED
+    
+    RESOURCES:
+    ==> v1/PersistentVolumeClaim
+    NAME         STATUS  VOLUME  CAPACITY  ACCESS MODES  STORAGECLASS  AGE
+    syfdb-mysql  Bound   db-pv   8Gi       RWO           1s
+    
+    ==> v1/Pod(related)
+    NAME                          READY  STATUS    RESTARTS  AGE
+    syfdb-mysql-67db9b8587-vk2tv  0/1    Init:0/1  0         0s
+    
+    ==> v1/Secret
+    NAME         TYPE    DATA  AGE
+    syfdb-mysql  Opaque  2     1s
+    
+    ==> v1/Service
+    NAME         TYPE       CLUSTER-IP  EXTERNAL-IP  PORT(S)   AGE
+    syfdb-mysql  ClusterIP  10.1.93.38  <none>       3306/TCP  1s
+    
+    ==> v1beta1/Deployment
+    NAME         READY  UP-TO-DATE  AVAILABLE  AGE
+    syfdb-mysql  0/1    1           0          1s
+    
+    
+    NOTES:
+    MySQL can be accessed via port 3306 on the following DNS name from within your cluster:
+    syfdb-mysql.default.svc.cluster.local
+    
+    To get your root password run:
+    
+        MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default syfdb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo)
+    
+    To connect to your database:
+    
+    1. Run an Ubuntu pod that you can use as a client:
+    
+        kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+    
+    2. Install the mysql client:
+    
+        $ apt-get update && apt-get install mysql-client -y
+    
+    3. Connect using the mysql cli, then provide your password:
+        $ mysql -h syfdb-mysql -p
+    
+    To connect to your database directly from outside the K8s cluster:
+        MYSQL_HOST=127.0.0.1
+        MYSQL_PORT=3306
+    
+        # Execute the following commands to route the connection:
+        export POD_NAME=$(kubectl get pods --namespace default -l "app=syfdb-mysql" -o jsonpath="{.items[0].metadata.name}")
+        kubectl port-forward $POD_NAME 3306:3306
+    
+        mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
+    
+    --------
+    
+    ##查看release列表
+    [root@node1 mysql]# helm list
+    NAME 	REVISION	UPDATED                 	STATUS  	CHART      	APP VERSION	NAMESPACE
+    syfdb	1       	Mon May 20 03:40:22 2019	DEPLOYED	mysql-0.3.5	           	default  
+    
+    --------
+    
+    ##查看release状态
+    $ helm status syfdb
+    [root@node1 mysql]# helm status syfdb
+    LAST DEPLOYED: Mon May 20 03:40:22 2019
+    NAMESPACE: default
+    STATUS: DEPLOYED
+    
+    RESOURCES:
+    ==> v1/PersistentVolumeClaim
+    NAME         STATUS  VOLUME  CAPACITY  ACCESS MODES  STORAGECLASS  AGE
+    syfdb-mysql  Bound   db-pv   8Gi       RWO           8m20s
+    
+    ==> v1/Pod(related)
+    NAME                          READY  STATUS   RESTARTS  AGE
+    syfdb-mysql-67db9b8587-vk2tv  1/1    Running  0         8m19s   ##pod已启动
+    
+    ==> v1/Secret
+    NAME         TYPE    DATA  AGE
+    syfdb-mysql  Opaque  2     8m20s
+    
+    ==> v1/Service
+    NAME         TYPE       CLUSTER-IP  EXTERNAL-IP  PORT(S)   AGE
+    syfdb-mysql  ClusterIP  10.1.93.38  <none>       3306/TCP  8m20s
+    
+    ==> v1beta1/Deployment
+    NAME         READY  UP-TO-DATE  AVAILABLE  AGE
+    syfdb-mysql  1/1    1           1          8m20s
+    
+    
+    NOTES:
+    MySQL can be accessed via port 3306 on the following DNS name from within your cluster:
+    syfdb-mysql.default.svc.cluster.local
+    
+    To get your root password run:
+    
+        MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default syfdb-mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo)
+    
+    To connect to your database:
+    
+    1. Run an Ubuntu pod that you can use as a client:
+    
+        kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+    
+    2. Install the mysql client:
+    
+        $ apt-get update && apt-get install mysql-client -y
+    
+    3. Connect using the mysql cli, then provide your password:
+        $ mysql -h syfdb-mysql -p
+    
+    To connect to your database directly from outside the K8s cluster:
+        MYSQL_HOST=127.0.0.1
+        MYSQL_PORT=3306
+    
+        # Execute the following commands to route the connection:
+        export POD_NAME=$(kubectl get pods --namespace default -l "app=syfdb-mysql" -o jsonpath="{.items[0].metadata.name}")
+        kubectl port-forward $POD_NAME 3306:3306
+    
+        mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
+    
+    --------
+    
+    ##查询deployment/service/pod
+    [root@node1 mysql]# kubectl get deployment | grep mysql
+    syfdb-mysql   1/1     1            1           9m41s
+    [root@node1 mysql]# kubectl get service | grep mysql
+    syfdb-mysql   ClusterIP   10.1.93.38   <none>        3306/TCP   9m53s
+    [root@node1 mysql]# kubectl get pod | grep mysql
+    syfdb-mysql-67db9b8587-vk2tv   1/1     Running   0          9m58s
+    
+    --------
+    
+    ##centos7安装mysql客户端
+    [root@node1 mysql]# yum install -y mariadb.x86_64 mariadb-libs.x86_64
+    
+    ##连接k8s集群内mysql服务
+    ##应用mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}此种连接方式,连接地址为service提供的IP地址和端口
+    [root@node1 mysql]# mysql -h 10.1.93.38 -P3306 -u root -psyf
+    Welcome to the MariaDB monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 1910
+    Server version: 5.7.14 MySQL Community Server (GPL)
+    
+    Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+    
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    
+    MySQL [(none)]> show databases;
+    MySQL [(none)]> create database syf;
+    Query OK, 1 row affected (0.02 sec)
+    
+    MySQL [(none)]> use syf
+    Database changed
+    MySQL [syf]> create table tb_user(name varchar(20));
+    Query OK, 0 rows affected (0.03 sec)
+    
+    MySQL [syf]> insert into tb_user values('kaixinyufeng');
+    Query OK, 1 row affected (0.01 sec)
+    
+    MySQL [syf]> select * from tb_user;
+    +--------------+
+    | name         |
+    +--------------+
+    | kaixinyufeng |
+    +--------------+
+    1 row in set (0.00 sec)
+    
+    MySQL [syf]> exit
+    
+    --------
+    
+    ###查看nfs存储已有内容
+    [root@node1 mysql]# ls /nfsdata/db-pv/
+    auto.cnf  ib_buffer_pool  ibdata1  ib_logfile0  ib_logfile1  ibtmp1  mysql  performance_schema  syf  sys
+    
+    --------
+    
+    ###查看Pod详情,mysql部署在node3节点上
+    [root@node1 mysql]# kubectl get pod -o wide | grep mysql
+    syfdb-mysql-67db9b8587-vk2tv   1/1     Running   0          167m   10.244.135.26   node3   <none>           <none>
+    
+    ###模拟Node3节点故障,关机
+    [root@node3 ~]# shutdown now
+    Connection to node3 closed by remote host.
+    Connection to node3 closed.
+    
+    或退出执行: $ vagrant halt node3
+    
+    ###查看节点运行状态,node3已经关闭
+    [root@node1 ~]# kubectl get node
+    NAME    STATUS     ROLES    AGE   VERSION
+    node1   Ready      master   52d   v1.13.3
+    node2   Ready      <none>   52d   v1.13.3
+    node3   NotReady   <none>   52d   v1.13.3
+    
+    ###等待一段时间,时间有点长...，查看deployment , pod
+    [root@node1 ~]# kubectl get deployment
+    NAME          READY   UP-TO-DATE   AVAILABLE   AGE
+    syfdb-mysql   1/1     1            1           3h    #已部署
+    
+    ##此时mysql被部署到node2节点
+    [root@node1 ~]# kubectl get pod -o wide | grep mysql
+    syfdb-mysql-67db9b8587-lrg47   1/1     Running       0          5m47s   10.244.104.55   node2   <none>           <none>
+    syfdb-mysql-67db9b8587-vk2tv   1/1     Terminating   0          3h1m    10.244.135.26   node3   <none>           <none>
+    
+    ###再次连接mysql数据库查看
+    [root@node1 ~]# mysql -h 10.1.93.38 -P3306 -u root -psyf
+    Welcome to the MariaDB monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 49
+    Server version: 5.7.14 MySQL Community Server (GPL)
+    
+    Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+    
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    
+    MySQL [(none)]> use syf
+    Reading table information for completion of table and column names
+    You can turn off this feature to get a quicker startup with -A
+    
+    Database changed
+    MySQL [syf]> select * from tb_user;
+    +--------------+
+    | name         |
+    +--------------+
+    | kaixinyufeng |
+    +--------------+
+    1 row in set (0.00 sec)
+
+    **以上，数据完好无损!!!**
+    
+    --------
+    
+    ##删除release
+    $ helm delete syfdb 
+    
+    **此时删除的release应用 $ helm list还可查询到**
+    
+    ##完全删除release
+    $ helm delete --purge syfdb
+    release "syfdb" deleted
+    
+    **此时删除的release无法再用 $ helm list查询到**
+    
+#### 7 升级和回滚release
+
+    helm upgrade syfdb #可以对已经发布的release进行升级　通过--values 或 --set应用新的配置。
+    
+    ##查看所有版本
+    [root@node1 ~]# helm history syfdb
+    REVISION	UPDATED                 	STATUS  	CHART      	DESCRIPTION     
+    1       	Mon May 20 03:40:22 2019	DEPLOYED	mysql-0.3.5	Install complete
+    
+    ##回滚到任意版本
+    $ helm rollback syfdb 1    # 可以回滚到任何版本(1是REVISION的值)
     
 
+#### 8 开发自己的chart
 
+>k8s提供了大量官方的chart, 不过要部署微服务，还是需要开发自己的chart
 
-      
-     
-     
+##### 8-1.创建chart
 
+>Helm会帮助创建目录mychart，并生成各类chart文件。我们在此基础上开发自己的chart.
 
-
-
-
+    ##创建目录mychart，并生成各类chart文件
+    [root@node1 helm-chart]# helm create mychart
+    Creating mychart
     
+    ##查看内容
+    [root@node1 helm-chart]# tree mychart/
+    mychart/
+    ├── charts  ##charts目录是本chart依赖的chart,初始为空目录
+    ├── Chart.yaml  ##用于描述这个chart的基本信息，包括名字，描述信息以及版本
+    ├── templates   ##是Kubernetes manifest文件模板目录，模板使用chart配置的值生成Kubernetes manifest文件。模板文件使用的Go语言模板语法
+    │   ├── deployment.yaml
+    │   ├── _helpers.tpl
+    │   ├── ingress.yaml
+    │   ├── NOTES.txt  ##纯文本文件，可在其中填写chart的使用说明,介绍chart部署后的一些信息。例如介绍如何使用这个chart，列出缺省的设置等
+    │   ├── service.yaml
+    │   └── tests
+    │       └── test-connection.yaml
+    └── values.yaml   ##用于存储templates目录中模板文件中用到的变量。 模板文件一般是Go模板。如果你需要了解更多关于Go模板的相关信息，可以查看Hugo (https://gohugo.io) 的一个关于Go模板的介绍 (https://gohugo.io/templates/go-templates/)
     
+    3 directories, 8 files
+    
+##### 8-2.调试
+
+>Helm提供了debug工具：
+    
+    helm lint XXXX:会检测chart语法，报告错误以及给出建议。
+    
+    helm install --dry-run XXXX --debug:会模拟安装chart, 输出每个模板生成的YAML内容，检查这些输出看是否符合我们的预期。
+    
+##### 8-3.安装chart
+
+>helm 提供了四种方法：
+
++ 安装仓库中的chart: $ helm install stable/nginx
+
++ 通过tar包安装: $ helm install ./nginx-1.2.3.tgz
+
++ chart本地目录安装: $ helm install ./nginx
+
++ 通过URL安装: helm install https://example.com/charts/nginx-1.2.3.tgz
+
+##### 8-4.将chart添加到仓库
 
 
 
-  
+参考:
+
+[强大的Kubernetes包管理工具](https://blog.csdn.net/zhaohuabing/article/details/80083960)
+
+
+
+**体胖还需勤跑步，人丑就要多读书!!! --开心玉凤**
+
+-------------------------------------------------
+*************************************************
+
+### 第12章 网络
+
+

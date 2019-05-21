@@ -49,7 +49,7 @@
     
 ## 集群版架构
 
-![](resources/images/2.jpg)
+![](resources/images/2.jpg)****
 
 **集群版架构存在问题**
 

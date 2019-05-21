@@ -77,6 +77,8 @@
     #logstash收集+处理+切割日志；ES存储索引日志；kibana调用访问日志页面呈现
     $ docker run -p 5601:5601 -p 9200:9200 -p 5044:5044 -it --name elk sebp/elk
     
+    ubuntu:docker run -d -p 5601:5601 -p 9200:9200 -p 5044:5044 -v /etc/sysctl.conf:/etc/sysctl.conf -e ES_MIN_MEM=128m  -e ES_MAX_MEM=1024m -it --name elk sebp/elk
+    
 ### 3。测试
 
     $ curl http://127.0.0.1:5601
