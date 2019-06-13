@@ -80,6 +80,8 @@ gin框架获取post请求的所有参数
 
 ### [http-post请求](resources/gosrc/http/http-post.txt)
 
+### [https请求-验证证书](https://studygolang.com/articles/2946)
+
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
 
 ### [Centrifugo(实时消息服务器)]()
