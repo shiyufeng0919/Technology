@@ -64,8 +64,6 @@ gin框架获取post请求的所有参数
 
 ### govendor包管理工具
 
-
-
 -----------------------------------------
 
 # golang项目应用
@@ -80,7 +78,9 @@ gin框架获取post请求的所有参数
 
 ### [http-post请求](resources/gosrc/http/http-post.txt)
 
-### [https请求-验证证书](https://studygolang.com/articles/2946)
+### [https请求-验证证书](resources/gosrc/http/http-put.txt)
+
+[参考](https://studygolang.com/articles/2946)
 
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
 
