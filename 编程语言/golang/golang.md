@@ -80,6 +80,14 @@ gin框架获取post请求的所有参数
 
 ### [https请求-验证证书](resources/gosrc/http/http-put.txt)
 
+### [golang读写文件](https://www.jianshu.com/p/7790ca1bc8f6)
+
+### [golang中struct、json、map互相转化](https://blog.csdn.net/xiaoquantouer/article/details/80233177)
+
+[开心玉凤](https://github.com/shiyufeng0919/goLang/blob/master/src/basicGrammer/%E5%B7%A5%E4%BD%9C%E5%B8%B8%E7%94%A8/struct%26Json%26map%26yaml.go)
+
+### [golang yaml与json配置文件互转](https://studygolang.com/articles/15148)
+
 [参考](https://studygolang.com/articles/2946)
 
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
