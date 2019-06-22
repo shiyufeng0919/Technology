@@ -31,19 +31,7 @@
     
 >项目目录结构：
 
-JRMVX5Y7HTD5:workspace syf$ tree monitor -d
-monitor
-└── prometheus   
-    ├── common         #公共目录(如:http连接，数据库连接，日志，定时任务，路由等)
-    ├── controller     #控制层/API层
-    ├── mapper         #数据访问对象目录
-    ├── model          #数据模型目录(struct)
-    ├── resources      #资源文件目录
-    ├── service        #事务控制目录
-    ├── unittesting    #测试目录
-    └── vendor         #govendor包管理工具   
-    ├── Dockerfile     #制作镜像
-    └── main.go        #程序入口
+![](resources/images/1.jpg)
     
 >应用govendor依赖包管理工具，将go get获取的依赖包，生成在/vendor目录下
 
