@@ -98,6 +98,127 @@
 
 [消息队列的使用场景是怎样的](https://www.zhihu.com/question/34243607)
 
+------------------------------------
+
+# 慕课网 kafka流处理平台
+
+>linkedIn开发,11年开源加入Apache基金会
+
++ 分布式数据同步系统Databus
+
++ 高性能计算引擎 Cubert
+
++ java异步处理框架 ParSeq
+
++ Kafka流处理平台
+
+## Kafka基本概念
+
++ Producer: 消息和数据的生产者，向kafka的一个topic发布消息的进程/代码/服务
+
++ Consumer: 消息和数据的消费者，订阅数据(Topic)并且处理其发布的消息的进程/代码/服务
+
++ Consumer Group：逻辑概念，对于同一个Topic，会广播给不同的Group,一个Group中，只有一个consumer可以消费该消息
+
++ Broker: 物理概念，kafka集群中的每个kafka节点
+
++ Topic: 逻辑概念，kafka消息的类别，对数据进行区分，隔离
+
++ Partition: 物理概念，kafka下数据存储的基本单元。一个Topic数据，会被分散存储到多个Partition，每一个Partition是有序的(Partition被分布在Broker上)
+
+    每一个topic被切分为多个Partitions
+    
+    消费者数目少于或等于Patition的数目(因为消费者大于Partition，会导致多个消费者同时消费一个Partition,会产生错误)
+    
+    Broker Group中的每个Broker保存Topic的一个或多个Partitions
+    
+    Consumer Group中的仅有一个Consumer读取Topic的一个或多个Partitions，并且是唯一的Consumer
+
++ Replication: 同一个Partition可能会有多个Replica,多个Replica之间的数据是一样的
+
+    当集群中有Broker挂掉的情况，系统可以主动地使Replicas提供服务
+    
+    系统默认设置每一个Topic的replication系统为1，可以在创建topic时单独设置
+    
+    Replication特点：
+    
+     (1)Replication的基本单位是Topic的Partition
+    
+     (2)所有的读和写都从Leader进，Followers只是做为备份
+     
+     (3)Follower必须能够及时复制Leader的数据
+     
+     (4)增加容错性与可扩展性
+
++ Replication Leader: 一个Partition的多个Replica上，需要一个Leader负责该Partition上与Producer和Consumer交互
+
++ ReplicaManager: 负责管理当前broker所有分区和副本的信息，处理KafkaController发起的一些请求。副本状态的切换，添加/读取消息等
+
+## Kafka基本结构
+
+>kafka基本结构
+
+![img](resources/images/13.jpg)
+
+>展示kafka做为消息队列的运作
+
+![img](resources/images/14.jpg)
+
+    Kafka强依赖zookeeper
+
+    Broker所有信息存储到Zookeeper,Topic和Partition分布存储到zookeeper
+
+>Kafka消息结构
+
+![img](resources/images/15.jpg)
+
+## Kafka特点
+
+### 分布式
+
++ 多分区 :多个Partition
+
++ 多副本 :Replications
+
++ 多订阅者 : Kafka一个topic有多个阅者，一个订阅者对应一个Partition
+
++ 基于zookeeper调度 : kafka很多信息存储到zookeeper上
+
+### 高性能
+
++ 高吞吐量 
+
++ 低延迟
+
++ 高并发 :高并发意味着高吞吐量
+
++ 时间复杂度为O(1)
+
+### 持久性与扩展性
+
++ 数据可持久化 
+
++ 容错性 :多副本及按组消费增强容错性
+
++ 支持在线水平扩展 : 一个Broker可以有一个或多个Partition
+
++ 消息自动平衡: 避免过度访问某几台机器或订阅消费集中在某几台机器
+
+## Kafka应用场景
+
+### 消息队列(消息可被重复消费)
+
+### 行为跟踪(如实时监控)
+
+### 日志收集
+
+### 流处理
+
+### 事件源(回溯事件变更，可存储大量日志)
+
+### 持久性日志(commit log)
+
+## Kafka简单案例
 
 
 
