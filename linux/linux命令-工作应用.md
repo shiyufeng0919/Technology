@@ -2,6 +2,8 @@
 
 + 解压缩命令
 
+    $ yum install -y unzip zip
+
 >unzip 解压文件到指定的目录
 
     unzip test.zip -d /root/    | unzip test.zip  正常直接解压
