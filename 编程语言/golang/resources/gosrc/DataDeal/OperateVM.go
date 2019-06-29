@@ -16,7 +16,7 @@ import (
 
  [
         {
-            "10.11.81.11": [
+            "11.11.11.11": [
                 {
                     "Spec": {
                         "Boot": null,
@@ -32,10 +32,10 @@ import (
                                     "Type": ""
                                 },
                                 "Format": "",
-                                "Path": "/Users/shiyufeng/VirtualBox VMs/node1/centos-7-1-1.x86_64.vmdk",
+                                "Path": "/Users/xxxx/VirtualBox VMs/node1/centos-7-1-1.x86_64.vmdk",
                                 "SizeMB": 0,
                                 "Type": "",
-                                "UUID": "e5fc0283-2c00-4dc3-93c3-a38974cb70bb"
+                                "UUID": "e5fc0283-2c00-4dc3-93c3-1111"
                             }
                         ],
                         "Group": "",
@@ -47,7 +47,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "525400261060",
+                                "MAC": "1111",
                                 "Mode": "nat",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -58,7 +58,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "0800279E102F",
+                                "MAC": "1111",
                                 "Mode": "bridged",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -84,10 +84,10 @@ import (
                             }
                         ]
                     },
-                    "UUID": "f6fa9977-fe1e-44c9-ae14-35450b52898f",
+                    "UUID": "f6fa9977-fe1e-44c9-ae14-1111",
                     "node": "node1",
                     "status": "start",
-                    "uuid": "f6fa9977-fe1e-44c9-ae14-35450b52898f"
+                    "uuid": "f6fa9977-fe1e-44c9-ae14-1111"
                 },
                 {
                     "Spec": {
@@ -104,10 +104,10 @@ import (
                                     "Type": ""
                                 },
                                 "Format": "",
-                                "Path": "/Users/shiyufeng/VirtualBox VMs/node2/centos-7-1-1.x86_64.vmdk",
+                                "Path": "/Users/xxxx/VirtualBox VMs/node2/centos-7-1-1.x86_64.vmdk",
                                 "SizeMB": 0,
                                 "Type": "",
-                                "UUID": "ef408b4b-88eb-4950-972a-118170939620"
+                                "UUID": "ef408b4b-88eb-4950-972a-11111"
                             }
                         ],
                         "Group": "",
@@ -119,7 +119,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "525400261060",
+                                "MAC": "1111",
                                 "Mode": "nat",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -130,7 +130,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "080027D031BA",
+                                "MAC": "1111",
                                 "Mode": "bridged",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -156,10 +156,10 @@ import (
                             }
                         ]
                     },
-                    "UUID": "49f147c1-757d-48cd-938b-658389d30209",
+                    "UUID": "49f147c1-757d-48cd-938b-1111",
                     "node": "node2",
                     "status": "start",
-                    "uuid": "49f147c1-757d-48cd-938b-658389d30209"
+                    "uuid": "49f147c1-757d-48cd-938b-1111"
                 }
             ]
         },
@@ -180,10 +180,10 @@ import (
                                     "Type": ""
                                 },
                                 "Format": "",
-                                "Path": "/Users/shiyufeng/VirtualBox VMs/node1/centos-7-1-1.x86_64.vmdk",
+                                "Path": "/Users/xxxx/VirtualBox VMs/node1/centos-7-1-1.x86_64.vmdk",
                                 "SizeMB": 0,
                                 "Type": "",
-                                "UUID": "e5fc0283-2c00-4dc3-93c3-a38974cb70bb"
+                                "UUID": "e5fc0283-2c00-4dc3-93c3-a389111111111"
                             }
                         ],
                         "Group": "",
@@ -195,7 +195,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "525400261060",
+                                "MAC": "1111",
                                 "Mode": "nat",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -206,7 +206,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "0800279E102F",
+                                "MAC": "1111",
                                 "Mode": "bridged",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -232,10 +232,10 @@ import (
                             }
                         ]
                     },
-                    "UUID": "f6fa9977-fe1e-44c9-ae14-35450b52898f",
+                    "UUID": "f6fa9977-fe1e-44c9-ae14-35450b521111",
                     "node": "node1",
                     "status": "stop",
-                    "uuid": "f6fa9977-fe1e-44c9-ae14-35450b52898f"
+                    "uuid": "f6fa9977-fe1e-44c9-ae14-35450b521111"
                 },
                 {
                     "Spec": {
@@ -252,10 +252,10 @@ import (
                                     "Type": ""
                                 },
                                 "Format": "",
-                                "Path": "/Users/shiyufeng/VirtualBox VMs/node2/centos-7-1-1.x86_64.vmdk",
+                                "Path": "/Users/xxx/VirtualBox VMs/node2/centos-7-1-1.x86_64.vmdk",
                                 "SizeMB": 0,
                                 "Type": "",
-                                "UUID": "ef408b4b-88eb-4950-972a-118170939620"
+                                "UUID": "ef408b4b-88eb-4950-972a-118170911111"
                             }
                         ],
                         "Group": "",
@@ -267,7 +267,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "525400261060",
+                                "MAC": "111",
                                 "Mode": "nat",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -278,7 +278,7 @@ import (
                                 "BootPrio": 0,
                                 "CableConnected": true,
                                 "Index": 0,
-                                "MAC": "080027D031BA",
+                                "MAC": "111111",
                                 "Mode": "bridged",
                                 "NetworkName": "",
                                 "PromiscuousMode": "",
@@ -304,10 +304,10 @@ import (
                             }
                         ]
                     },
-                    "UUID": "49f147c1-757d-48cd-938b-658389d30209",
+                    "UUID": "49f147c1-757d-48cd-938b-111",
                     "node": "node2",
                     "status": "stop",
-                    "uuid": "49f147c1-757d-48cd-938b-658389d30209"
+                    "uuid": "49f147c1-757d-48cd-938b-1111"
                 }
             ]
         }
