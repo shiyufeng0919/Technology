@@ -15,7 +15,13 @@ gin  |不支持，手动编写MVC|不支持 |不支持(依赖第三方支持sess
 
 ### 二。gin框架
 
-gin框架获取post请求的所有参数
+[gin框架获取post请求的所有参数](https://blog.csdn.net/keyunq/article/details/82226280)
+
+    描述：前端传递json格式数据，后端从ctx *gin.Context中获取该json数据
+    
+    data, _ := ioutil.ReadAll(ctx.Request.Body)
+    
+    fmt.Printf("ctx.Request.body: %v", string(data))
 
 -----------------------------------------
 
@@ -80,7 +86,7 @@ gin框架获取post请求的所有参数
 
 ### [https请求-验证证书](resources/gosrc/http/http-put.txt)
 
-### [golang读写文件](https://www.jianshu.com/p/7790ca1bc8f6)
+### [golang读写文件](https://www.jianshu.com/p/7790ca1bc8f6)  | [golang覆盖写入文件](https://www.cnblogs.com/kumata/p/10161754.html)  | [golang追加写入文件](https://blog.csdn.net/e421083458/article/details/52692344)
 
 ### [golang中struct、json、map互相转化](https://blog.csdn.net/xiaoquantouer/article/details/80233177)
 
@@ -93,6 +99,11 @@ gin框架获取post请求的所有参数
 ### [websocket-golang.org/x/net/websocke](./resources/gosrc/websocket/websocket示例1.txt)
 
 ### [Centrifugo(实时消息服务器)]()
+
+### golang正则--项目应用
+
+[go语言中使用正则表达式判断IPv4地址是否合法](https://blog.csdn.net/choumin/article/details/90177007)
+    
 
 ## golang+redis
 

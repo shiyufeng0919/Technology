@@ -81,6 +81,8 @@ Redis是使用c语言开发的一个高性能键值数据库，Redis可以通过
 
 ### 图形界面客户端-redis-desktop-manager
 
+### 使用RedisPlus客户端连接redis
+
 ### jedis 客户端 -企业应用最多
 
 [github-jedis](https://github.com/xetorthio/jedis) | [Java单例连接redis](https://juejin.im/post/5b4dd82ee51d451925629622#heading-63)

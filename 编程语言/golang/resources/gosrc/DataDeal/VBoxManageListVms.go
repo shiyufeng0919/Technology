@@ -14,27 +14,28 @@ import (
 	"strings"
 )
 
-type VMList struct {
+type Vmlist struct {
 	Node   string `json:"node"`
 	Status string `json:"status"`
 	UUID   string `json:"uuid"`
+	VMIp   []string `json:"vmIp"`
 	*vbg.VirtualMachine
 }
 
 //1.
-func ManageVMList() ([]VMList, error) {
+func ManageVMLists() ([]Vmlist, error) {
 
 	logs.Info("-------客户端获取虚拟机明细信息Start--------")
 	defer logs.Info("-------客户端获取虚拟机明细信息End--------")
 
-	vmNameListArr, err := ExecCmdGetVMList()
+	vmNameListArr, err := ExecCmdGetVMLists()
 	if err != nil {
 		return nil, err
 	}
 
 	for key, vm := range vmNameListArr {
 
-		machine, err := GetVMInfo(vm.Node)
+		machine, err := GetVMInfos(vm.Node)
 
 		vmNameListArr[key].VirtualMachine = machine
 
@@ -57,12 +58,12 @@ func ManageVMList() ([]VMList, error) {
 }
 
 //2.执行命令获取虚拟机
-func ExecCmdGetVMList() ([]VMList, error) {
+func ExecCmdGetVMLists() ([]Vmlist, error) {
 
 	logs.Info("-----执行命令VBoxManage list vms Start------")
 	defer logs.Info("-----执行命令VBoxManage list vms END------")
 
-	val, err := ExecCmd("list", "vms")
+	val, err := ExecCmds("list", "vms")
 
 	if err != nil {
 		logs.Error("执行命令，获取vm list异常,", err.Error())
@@ -71,7 +72,7 @@ func ExecCmdGetVMList() ([]VMList, error) {
 
 	logs.Info("执行VBoxManage list vms返回结果:", string(val))
 
-	valRunning, err := ExecCmd("list", "runningvms")
+	valRunning, err := ExecCmds("list", "runningvms")
 
 	if err != nil {
 		logs.Error("处理vmRunningList数据为数组错误:", err.Error())
@@ -80,7 +81,7 @@ func ExecCmdGetVMList() ([]VMList, error) {
 
 	logs.Info("执行VBoxManage list runningvms返回结果:", string(valRunning))
 
-	vmlistArr, err := DealVmListData(val, valRunning)
+	vmlistArr, err := DealVmListDatas(val, valRunning)
 
 	if err != nil {
 		logs.Error("处理vmlist数据为数组错误:", err.Error())
@@ -92,7 +93,7 @@ func ExecCmdGetVMList() ([]VMList, error) {
 }
 
 //3.
-func ExecCmd(arg ...string) ([]byte, error) {
+func ExecCmds(arg ...string) ([]byte, error) {
 	cmd := exec.Command("VBoxManage", arg...)
 	opBytes, err := cmd.Output()
 	if err != nil {
@@ -102,7 +103,7 @@ func ExecCmd(arg ...string) ([]byte, error) {
 }
 
 //4.处理执行命令后返回的数据
-func DealVmListData(val, valRunning []byte) ([]VMList, error) {
+func DealVmListDatas(val, valRunning []byte) ([]Vmlist, error) {
 
 	logs.Info("-----DealVmListData Start----")
 	logs.Info("-----DealVmListData END----")
@@ -123,7 +124,7 @@ func DealVmListData(val, valRunning []byte) ([]VMList, error) {
 
 	fmt.Printf("itemListRunning:%+v\n\n", runResult)
 
-	var itemList = make([]VMList, len(result)-1)
+	var itemList = make([]Vmlist, len(result)-1)
 
 	for i, v := range result {
 
@@ -159,7 +160,7 @@ func DealVmListData(val, valRunning []byte) ([]VMList, error) {
 }
 
 //5.
-func GetVMInfo(name string) (machine *vbg.VirtualMachine, err error) {
+func GetVMInfos(name string) (machine *vbg.VirtualMachine, err error) {
 	logs.Info("-----获取虚拟机名为%s的信息 Start----", name)
 	defer logs.Info("-----获取虚拟机名为%s的信息 END------", name)
 	vb := vbg.NewVBox(vbg.Config{})
@@ -174,7 +175,7 @@ type VMClientListResponse struct {
 }
 
 //1. 构造物理IP与虚拟机间关系提供给前端展示
-func CallVmClientGetVmList() {
+func CallVmClientGetVmLists() {
 
 	//获取 ip地址，建立http连接
 	clientIpArr := viper.GetStringSlice("vmclient.ip")
@@ -189,7 +190,7 @@ func CallVmClientGetVmList() {
 
 		logs.Info("调用VM客户端的url为：", url)
 
-		body, err := ConnectHttpGetCommon(url) //上述ManageVMList返回的结果(本示例分虚拟机客户端，部署在每一台物理机，及web-server两部分，所以此处为http连接虚拟机客户端)
+		body, err := ConnectHttpGetCommons(url) //上述ManageVMList返回的结果(本示例分虚拟机客户端，部署在每一台物理机，及web-server两部分，所以此处为http连接虚拟机客户端)
 
 		if err != nil {
 			logs.Error("连接vm-client错误:", err.Error())
@@ -227,7 +228,7 @@ func CallVmClientGetVmList() {
 }
 
 //普通http GET请求
-func ConnectHttpGetCommon(url string) ([]byte, error) {
+func ConnectHttpGetCommons(url string) ([]byte, error) {
 
 	//通过设置tls.Config的InsecureSkipVerify为true，client将不再对服务端的证书进行校验
 	tr := &http.Transport{

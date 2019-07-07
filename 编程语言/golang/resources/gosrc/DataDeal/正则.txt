@@ -1,0 +1,56 @@
+#校验IP地址
+
+func main() {
+    str := "1.2.3.4"
+    ipReg := `^((0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])\.){3}(0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])$`
+    match, _ := regexp.MatchString(ipReg, str)
+    if match {
+        fmt.Printf("%s is a legal ipv4 address\n", str)
+    } else {
+        fmt.Printf("%s is not a legal ipv4 address\n", str)
+    }
+}
+对于上面的代码而言，它虽然能实现判断IPv4地址的合法性，但有一个缺点是速度比较慢，我有将近1900万个字符串需要进行判断，用上面的代码来处理这么多字符串，程序的运行时间大概接近500秒，这远远超过匹配后对这些字符串所进行的其他处理操作，因此，在这里需要寻找更快的匹配方法。
+
+经过查阅资料可知，可以先对正则表达式进行编译，以得到一个优化的Regexp结构体，然后再用优化后的对象进行匹配。具体代码如下所示：
+
+package main
+
+import "regexp"
+import "fmt"
+
+func main() {
+    str := "1.2.3.4"
+    ipReg := `^((0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])\.){3}(0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])$`
+    r, _ := regexp.Compile(ipReg)
+    match := r.MatchString(str)
+    if match {
+        fmt.Printf("%s is a legal ipv4 address\n", str)
+    } else {
+        fmt.Printf("%s is not a legal ipv4 address\n", str)
+    }
+}
+除了对正则表达进行编译外，还有另外一个方法可以高效的对IPv4地址的合法性进行判断，那就是使用net包里面的ParseIP方法。具体代码如下所示：
+
+package main
+
+import "net"
+import "fmt"
+
+func main() {
+    str := "1.2.3.4"
+    address := net.ParseIP(str)
+    if address != nil {
+        fmt.Printf("%s is a legal ipv4 address\n", str)
+    } else {
+        fmt.Printf("%s is not a legal ipv4 address\n", str)
+    }
+}
+使用100万个字符串对上述三种方法分别进行测试，得到的程序运行时间分别是：
+
+    25745ms, 161ms, 16ms
+从上述结果来看，net包中的ParseIP方法在判断IPv4地址的合法性上具有压倒性的优势。
+
+
+
+--------------------------------------------------------------------------

@@ -1,0 +1,1 @@
+### [x509命令-读取一个证书的信息](https://blog.csdn.net/qq553633980/article/details/72637837)

@@ -322,7 +322,7 @@ func WebStartAndStop(ctx *gin.Context) {
 	logs.Info("--------web前端接口：启停虚拟机Start-----------")
 	defer logs.Info("--------web前端接口：启停虚拟机End-----------")
 
-	vmMap := []map[string][]VMList{}
+	vmMap := []map[string][]Vmlist{}
 
 	err := ctx.ShouldBindJSON(&vmMap)
 
@@ -345,7 +345,7 @@ func WebStartAndStop(ctx *gin.Context) {
 }
 
 //2.调用虚拟机客户端启动/停止虚拟机
-func CallVmClientStopAndStartVM(ip string, vminfo []VMList) error {
+func CallVmClientStopAndStartVM(ip string, vminfo []Vmlist) error {
 
 	//建立http连接，停止/启动虚拟机
 	url := GetVMClientUrl(ip, "operate")
@@ -384,7 +384,7 @@ func GetVMClientUrl(ip, callType string) string {
 }
 
 //4.POST请求
-func ConnectVmClientHttpPost(url string, params []VMList) ([]byte, error) {
+func ConnectVmClientHttpPost(url string, params []Vmlist) ([]byte, error) {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

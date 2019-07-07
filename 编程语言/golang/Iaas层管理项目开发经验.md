@@ -81,11 +81,17 @@ Iaas层管理：主要通过前端监控虚拟机信息，包括：虚拟机Ip�
 
 [GoLang中 json、map、struct 之间的相互转化](https://www.cnblogs.com/liang1101/p/6741262.html)
 
+[Go语言常用字符串处理方法实例汇总](resources/gosrc/DataDeal/StringsDeal.go)
+
 [golang程序执行命令：VBoxManage list vms 处理返回的结果](resources/gosrc/DataDeal/VBoxManageListVms.go)
 
 [VBoxManage list vms返回前端数据作为参数](resources/gosrc/DataDeal/OperateVM.go)
 
-[golang time包ticker使用]
+[golang执行linux命令中管道符|的应用](resources/gosrc/DataDeal/Cmd.go)
+
+[golang time包ticker使用: 定时任务，同cron定时计划]
+
+[golang从对象中摘取数据及正则验证IP](resources/gosrc/DataDeal/filterVMinfo.go)
 
 
 
