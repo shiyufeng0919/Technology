@@ -23,6 +23,8 @@
 
 > [centos7 安装jdk 1.8](https://www.cnblogs.com/ocean-sky/p/8392444.html)
 
+> 查看进程 $ ps -ef
+
 > 查看端口被哪个应用/进程占用
 
     $ yum install net-tools

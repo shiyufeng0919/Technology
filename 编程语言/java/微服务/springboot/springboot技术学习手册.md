@@ -48,7 +48,7 @@
     
          视图名称 *.ftl ,模版文件
      
-    > (3)Spring整合Thymeleaf(重点)(Thymeleaf也是一个模版型视图技术，同freemarker)
+    > (3)Spring Boot整合Thymeleaf(重点)(Thymeleaf也是一个模版型视图技术，同freemarker)
     
           存放视图目录要求在:src/resources/templates,该目录安全，该目录不允许外界直接访问(不允许浏览器输入url访问该目录资源,必须通过controller进行视图解析跳转才可访问)
           
@@ -151,11 +151,32 @@
          
        C>实体类(Users):定义表相关注解
        
-       D>定义接口(声明一个方法，向里写入数据)
+       D>定义接口(声明一个方法，向里写入数据)[springBoot整合Spring Data JPA-Repository接口使用]
        
        E>测试类(调用接口，写入一条数据。此时数据库中无该表，执行写入操作，会自动根据实体类注解创建该表)
        
+       F>Spring Boot整合Spring Data JPA-CrudRepository接口使用
+       
+         CrudRepository主要完成增删改查的操作,CrudRepository接口继承了Repository接口
+         
+         ctrl+o:查看方法的所有形为
+         
+       G>SpringBoot整合Spring Data JPA-PagingAndSortingRepository接口使用
+       
+         PagingAndSortingRepository接口主要提供了分页和排序的操作
+         
+         PagingAndSortingRepository接口继承了CrudRepository
 
 >10.Spring Boot定时任务
+
+--------------------------
+
+思维导图:
+
+![img](resources/images/2.jpg)
+
+--------------------------
+
+体胖还需勤跑步，人丑就该多读书！  ------开心玉凤 2019.7.13
 
  
