@@ -1,0 +1,24 @@
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+OrdererOrgs:
+  - Name: Orderer
+    Domain: example.com
+    # [method1]:"Specs": "{{.Hostname}}.{{.Domain}}" = orderer.example.com
+    Specs:
+      - Hostname: orderer
+# "PeerOrgs" - Definition of organizations managing peer nodes
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.example.com
+    # [method2]:"template"
+    Template:
+      Count: 2
+      # Start: 5
+      # Hostname: {{.Prefix}}{{.Index}} # default
+    Users:
+      Count: 1
+  - Name: Org2
+    Domain: org2.example.com
+    Template:
+      Count: 2
+    Users:
+      Count: 1
